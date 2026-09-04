@@ -1,0 +1,6 @@
+dist
+coverage
+.angular
+node_modules
+mock-api/db.json
+package-lock.json

@@ -1,0 +1,18 @@
+@use 'tokens' as *;
+
+.dashboard-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-space-6);
+}
+
+.dashboard-page__board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--app-space-4);
+  align-items: start;
+
+  @include below('tablet') {
+    grid-template-columns: 1fr;
+  }
+}

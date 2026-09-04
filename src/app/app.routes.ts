@@ -13,11 +13,11 @@ export const routes: Routes = [
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
       {
-        // TODO(phase 4.5): replace with the lazy-loaded dashboard feature.
         path: 'dashboard',
         loadComponent: () =>
-          import('./shared/ui/placeholder-page/placeholder-page').then((m) => m.PlaceholderPage),
-        data: { title: 'Dashboard', subtitle: 'The board is landing in the next phase.' },
+          import('./features/dashboard/pages/dashboard-page/dashboard-page').then(
+            (m) => m.DashboardPage,
+          ),
       },
       {
         // TODO(later phase): task list / create-edit form host.

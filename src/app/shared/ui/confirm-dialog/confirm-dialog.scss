@@ -1,0 +1,7 @@
+// Material's M3 theme doesn't expose a simple per-instance colour token for
+// mat-flat-button, so the destructive variant overrides its computed
+// background/text colour directly rather than fighting for specificity.
+.confirm-dialog__destructive {
+  background-color: var(--app-priority-high) !important;
+  color: var(--app-primary-contrast) !important;
+}

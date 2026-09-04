@@ -17,4 +17,8 @@ export class NotificationService {
   showSuccess(message: string): void {
     this.snackBar.open(message, undefined, { duration: 3000, panelClass: 'app-snackbar-success' });
   }
+
+  showInfo(message: string): void {
+    this.snackBar.open(message, undefined, { duration: 3000, panelClass: 'app-snackbar-info' });
+  }
 }

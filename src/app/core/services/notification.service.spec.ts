@@ -33,4 +33,14 @@ describe('NotificationService', () => {
       expect.objectContaining({ duration: 3000, panelClass: 'app-snackbar-success' }),
     );
   });
+
+  it('showInfo() opens a self-dismissing snackbar with info styling', () => {
+    service.showInfo('Coming soon');
+
+    expect(snackBarSpy.open).toHaveBeenCalledWith(
+      'Coming soon',
+      undefined,
+      expect.objectContaining({ duration: 3000, panelClass: 'app-snackbar-info' }),
+    );
+  });
 });

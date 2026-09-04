@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import type { Observable } from 'rxjs';
-import type { CreateTaskDto, Task, UpdateTaskDto } from '../models/task.model';
+import type { CreateTaskDto, Task, TaskPatch } from '../models/task.model';
 import { API_BASE_URL } from '../tokens/api.tokens';
 
 /**
@@ -28,7 +28,7 @@ export class TaskApiService {
     return this.http.post<Task>(`${this.baseUrl}/tasks`, dto);
   }
 
-  update(id: string, patch: UpdateTaskDto): Observable<Task> {
+  update(id: string, patch: TaskPatch): Observable<Task> {
     return this.http.patch<Task>(`${this.baseUrl}/tasks/${id}`, patch);
   }
 

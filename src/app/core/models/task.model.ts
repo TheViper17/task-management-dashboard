@@ -63,6 +63,18 @@ export interface CreateTaskDto {
 
 export type UpdateTaskDto = Partial<CreateTaskDto>;
 
+/**
+ * The full set of fields the API will accept in a PATCH, wider than
+ * `UpdateTaskDto`: it also allows `order` (board position), which is
+ * store-owned and never exposed on the create/edit form.
+ */
+export type TaskPatch = Partial<
+  Pick<
+    Task,
+    'title' | 'description' | 'status' | 'priority' | 'dueDate' | 'assigneeId' | 'tags' | 'order'
+  >
+>;
+
 export interface TaskFilters {
   status: TaskStatus | 'all';
   priority: TaskPriority | 'all';

@@ -1,8 +1,10 @@
-import type { Task, TaskFilters } from '../models/task.model';
+import type { CreateTaskDto, Task, TaskFilters } from '../models/task.model';
 import { DEFAULT_TASK_FILTERS } from '../models/task.model';
 import {
+  applyTaskPatch,
   countByPriority,
   countByStatus,
+  createOptimisticTask,
   daysUntil,
   deriveTaskCounts,
   filterTasks,
@@ -167,6 +169,61 @@ describe('task.utils', () => {
 
     it('returns all zeros for an empty list', () => {
       expect(deriveTaskCounts([])).toEqual({ total: 0, completed: 0, inProgress: 0, overdue: 0 });
+    });
+  });
+
+  describe('createOptimisticTask', () => {
+    const assignee = { id: 'user-1', name: 'Ada Lovelace', avatar: 'AL', email: 'ada@company.com' };
+    const dto: CreateTaskDto = {
+      title: 'New task',
+      description: 'desc',
+      status: 'todo',
+      priority: 'medium',
+      dueDate: '2026-09-01', // in the past relative to the faked "today"
+      assigneeId: 'user-1',
+      tags: ['Design'],
+    };
+
+    it('builds a Task with an optimistic id, the given assignee, and a derived isOverdue', () => {
+      const task = createOptimisticTask(dto, assignee, []);
+      expect(task.id).toMatch(/^optimistic-/);
+      expect(task.assignee).toBe(assignee);
+      expect(task.isOverdue).toBe(true);
+      expect(task.title).toBe(dto.title);
+    });
+
+    it('places the task last within its target status column', () => {
+      const existing = [
+        makeTask({ status: 'todo', order: 0 }),
+        makeTask({ status: 'todo', order: 1 }),
+        makeTask({ status: 'done', order: 0 }),
+      ];
+      const task = createOptimisticTask(dto, assignee, existing);
+      expect(task.order).toBe(2);
+    });
+  });
+
+  describe('applyTaskPatch', () => {
+    it('merges the patch fields into the task', () => {
+      const task = makeTask({ title: 'Old title', priority: 'low' });
+      const patched = applyTaskPatch(task, { title: 'New title' });
+      expect(patched.title).toBe('New title');
+      expect(patched.priority).toBe('low');
+    });
+
+    it('recomputes isOverdue from the merged status and due date', () => {
+      const task = makeTask({ status: 'todo', dueDate: '2026-09-01', isOverdue: false });
+      const patched = applyTaskPatch(task, { status: 'done' });
+      expect(patched.isOverdue).toBe(false); // done tasks are never overdue
+
+      const stillTodo = applyTaskPatch(task, { dueDate: '2026-09-01' });
+      expect(stillTodo.isOverdue).toBe(true); // past due date, still todo
+    });
+
+    it('bumps updatedAt', () => {
+      const task = makeTask({ updatedAt: '2020-01-01T00:00:00.000Z' });
+      const patched = applyTaskPatch(task, { title: 'x' });
+      expect(patched.updatedAt).toBe('2026-09-04T12:00:00.000Z'); // faked "now"
     });
   });
 });

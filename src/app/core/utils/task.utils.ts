@@ -1,4 +1,13 @@
-import type { Task, TaskFilters, TaskPriority, TaskStatus } from '../models/task.model';
+import type {
+  Assignee,
+  CreateTaskDto,
+  Task,
+  TaskFilters,
+  TaskPatch,
+  TaskPriority,
+  TaskStatus,
+} from '../models/task.model';
+import { generateOptimisticId } from './id.utils';
 
 /**
  * Whether a task is overdue *right now*, recomputed rather than trusted from
@@ -89,4 +98,45 @@ export function deriveTaskCounts(tasks: readonly Task[]): TaskCounts {
   }
 
   return { total: tasks.length, completed, inProgress, overdue };
+}
+
+/**
+ * Builds the placeholder `Task` shown immediately after a user submits the
+ * create form, before the server has responded. `TaskStore.create()` inserts
+ * this, then swaps it for the real record (or removes it on failure).
+ *
+ * `order` places the card last in its target column, consistent with where
+ * a genuinely new task would land.
+ */
+export function createOptimisticTask(
+  dto: CreateTaskDto,
+  assignee: Assignee,
+  existing: readonly Task[],
+): Task {
+  const now = new Date().toISOString();
+  return {
+    id: generateOptimisticId(),
+    title: dto.title,
+    description: dto.description,
+    status: dto.status,
+    priority: dto.priority,
+    dueDate: dto.dueDate,
+    isOverdue: isTaskOverdue({ dueDate: dto.dueDate, status: dto.status }),
+    assignee,
+    assigneeId: dto.assigneeId,
+    tags: dto.tags,
+    order: existing.filter((t) => t.status === dto.status).length,
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
+/**
+ * Merges a patch into a task for optimistic local updates, recomputing
+ * `isOverdue` and `updatedAt` from the merged result so a status/due-date
+ * change is reflected immediately, before the server confirms it.
+ */
+export function applyTaskPatch(task: Task, patch: TaskPatch): Task {
+  const merged: Task = { ...task, ...patch, updatedAt: new Date().toISOString() };
+  return { ...merged, isOverdue: isTaskOverdue(merged) };
 }

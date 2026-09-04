@@ -82,7 +82,8 @@
               "src/app/**/*.routes.ts",
               "src/app/**/*.config.ts",
               "src/app/**/index.ts",
-              "src/app/**/*.mock.ts"
+              "src/app/**/*.mock.ts",
+              "src/app/core/testing/**"
             ],
             "coverageReporters": ["text-summary", "html", "lcovonly"],
             "coverageThresholds": {

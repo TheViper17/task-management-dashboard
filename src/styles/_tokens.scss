@@ -1,0 +1,133 @@
+// =============================================================================
+// Design Tokens
+// -----------------------------------------------------------------------------
+// Single source of truth for colour, spacing, radius, elevation and layout.
+// Values are derived from the Figma design and the mock-data palette
+// (see mock-api generator: #1976D2 / #388E3C / #FF6F00 / #D32F2F).
+//
+// Two layers are exposed:
+//   1. CSS custom properties on :root  -> usable at runtime and in component SCSS
+//   2. Sass variables / maps           -> usable at compile time (e.g. media queries)
+// =============================================================================
+
+// ----------------------------------------------------------------------------
+// 1. Runtime tokens (CSS custom properties)
+// ----------------------------------------------------------------------------
+:root {
+  // Brand ------------------------------------------------------------------
+  --app-primary: #1976d2;
+  --app-primary-hover: #1565c0;
+  --app-primary-contrast: #ffffff;
+
+  // Priority -------------------------------------------------------------------
+  --app-priority-high: #d32f2f;
+  --app-priority-high-surface: #fdecea;
+  --app-priority-medium: #ed6c02;
+  --app-priority-medium-surface: #fff4e5;
+  --app-priority-low: #2e7d32;
+  --app-priority-low-surface: #edf7ed;
+
+  // Status (kanban column accents, used for card hover borders) ---------------
+  --app-status-todo: #1976d2;
+  --app-status-in-progress: #ed6c02;
+  --app-status-done: #2e7d32;
+
+  // Overdue card treatment --------------------------------------------------
+  --app-overdue-surface: #fdecea;
+  --app-overdue-border: #d32f2f;
+
+  // Deltas (stat card change labels) --------------------------------------
+  --app-delta-positive: #2e7d32;
+  --app-delta-negative: #d32f2f;
+  --app-delta-neutral: #6b7280;
+
+  // Surfaces & lines ------------------------------------------------------
+  --app-bg: #f5f6f8;
+  --app-surface: #ffffff;
+  --app-surface-hover: #f5f5f5;
+  --app-border: #e0e0e0;
+  --app-border-strong: #bdbdbd;
+
+  // Text ----------------------------------------------------------------------
+  --app-text: #1f2430;
+  --app-text-muted: #6b7280;
+
+  // Spacing scale (4px base) --------------------------------------------------
+  --app-space-1: 4px;
+  --app-space-2: 8px;
+  --app-space-3: 12px;
+  --app-space-4: 16px;
+  --app-space-5: 20px;
+  --app-space-6: 24px;
+  --app-space-8: 32px;
+  --app-space-10: 40px;
+
+  // Radius ------------------------------------------------------------------
+  --app-radius-sm: 4px;
+  --app-radius-md: 8px;
+  --app-radius-lg: 12px;
+  --app-radius-pill: 999px;
+
+  // Elevation -------------------------------------------------------------
+  --app-elevation-card: 0 1px 2px rgba(16, 24, 40, 0.06), 0 1px 3px rgba(16, 24, 40, 0.1);
+  --app-elevation-card-hover: 0 4px 8px rgba(16, 24, 40, 0.08), 0 2px 4px rgba(16, 24, 40, 0.06);
+  --app-elevation-overlay: 0 12px 32px rgba(16, 24, 40, 0.16);
+
+  // Layout ------------------------------------------------------------------
+  --app-header-height: 64px;
+  --app-sidebar-width: 208px;
+  --app-content-max: 1600px;
+
+  // Motion ------------------------------------------------------------------
+  --app-motion-fast: 120ms;
+  --app-motion-base: 200ms;
+  --app-motion-slow: 320ms;
+  --app-easing-standard: cubic-bezier(0.2, 0, 0, 1);
+
+  // Z-index -----------------------------------------------------------------
+  --app-z-header: 100;
+  --app-z-sidebar: 90;
+  --app-z-overlay: 1000;
+}
+
+// ----------------------------------------------------------------------------
+// 2. Compile-time tokens (Sass) — needed where CSS variables cannot be used
+// ----------------------------------------------------------------------------
+
+// Responsive breakpoints. Desktop is the design base; everything below is
+// adapted. Aligned with Angular CDK BreakpointObserver ranges.
+$breakpoint-mobile: 599.98px; // Handset  : max-width
+$breakpoint-tablet: 1023.98px; // Tablet  : max-width
+$breakpoint-desktop: 1024px; // Desktop  : min-width
+
+/// Max-width media query helper.
+/// @example scss
+///   @include below('tablet') { ... }
+@mixin below($size) {
+  @if $size == 'mobile' {
+    @media (max-width: $breakpoint-mobile) {
+      @content;
+    }
+  } @else if $size == 'tablet' {
+    @media (max-width: $breakpoint-tablet) {
+      @content;
+    }
+  } @else {
+    @error 'below() expects "mobile" or "tablet", got #{$size}.';
+  }
+}
+
+/// Min-width media query helper.
+@mixin from($size) {
+  @if $size == 'desktop' {
+    @media (min-width: $breakpoint-desktop) {
+      @content;
+    }
+  } @else if $size == 'tablet' {
+    @media (min-width: $breakpoint-mobile + 0.02) {
+      @content;
+    }
+  } @else {
+    @error 'from() expects "tablet" or "desktop", got #{$size}.';
+  }
+}

@@ -1,0 +1,27 @@
+// =============================================================================
+// Angular Material M3 theme
+// -----------------------------------------------------------------------------
+// The Figma palette is Material Blue (#1976D2), so the built-in azure palette
+// is a near-exact match for `primary`. Component-specific colours (priority,
+// status, overdue) live in _tokens.scss as CSS custom properties, not here.
+// =============================================================================
+@use '@angular/material' as mat;
+
+html {
+  height: 100%;
+
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$azure-palette,
+        tertiary: mat.$blue-palette,
+      ),
+      typography: Roboto,
+      density: 0,
+    )
+  );
+
+  // Keep interactive controls comfortable on touch while the design stays dense.
+  @include mat.button-density(-1);
+  @include mat.form-field-density(-2);
+}

@@ -25,14 +25,23 @@ function makeTask(overrides: Partial<Task> = {}): Task {
 describe('BoardColumn', () => {
   it('renders the title and a count badge matching the task count', async () => {
     await render(BoardColumn, {
-      inputs: { title: 'To Do', tasks: [makeTask({ id: '1' }), makeTask({ id: '2' })] },
+      inputs: {
+        title: 'To Do',
+        status: 'todo',
+        tasks: [makeTask({ id: '1' }), makeTask({ id: '2' })],
+      },
     });
     expect(screen.getByText('To Do')).toBeInTheDocument();
     expect(screen.getByText('2')).toBeInTheDocument();
   });
 
+  it('labels the column region with its title, not the title() function itself', async () => {
+    await render(BoardColumn, { inputs: { title: 'To Do', status: 'todo', tasks: [] } });
+    expect(screen.getByRole('region', { name: 'To Do column' })).toBeInTheDocument();
+  });
+
   it('shows an empty-state message when there are no tasks', async () => {
-    await render(BoardColumn, { inputs: { title: 'Done', tasks: [] } });
+    await render(BoardColumn, { inputs: { title: 'Done', status: 'done', tasks: [] } });
     expect(screen.getByText('No tasks here.')).toBeInTheDocument();
     expect(screen.getByText('0')).toBeInTheDocument();
   });
@@ -40,7 +49,9 @@ describe('BoardColumn', () => {
   it('re-emits taskEdit/taskDelete with the originating task', async () => {
     const user = userEvent.setup();
     const task = makeTask({ id: '1', title: 'Design homepage' });
-    const { fixture } = await render(BoardColumn, { inputs: { title: 'To Do', tasks: [task] } });
+    const { fixture } = await render(BoardColumn, {
+      inputs: { title: 'To Do', status: 'todo', tasks: [task] },
+    });
     const edited: Task[] = [];
     fixture.componentInstance.taskEdit.subscribe((t) => edited.push(t));
 
@@ -48,5 +59,24 @@ describe('BoardColumn', () => {
     await user.click(await screen.findByRole('menuitem', { name: /edit/i }));
 
     expect(edited).toEqual([task]);
+  });
+
+  describe('drag and drop', () => {
+    it('derives its drop-list id from the status input', async () => {
+      const { fixture } = await render(BoardColumn, {
+        inputs: { title: 'In Progress', status: 'in_progress', tasks: [] },
+      });
+      const list = (fixture.nativeElement as HTMLElement).querySelector('.board-column__list')!;
+      expect(list.id).toBe('board-column-in_progress');
+    });
+
+    it('disables dragging for an optimistic (not-yet-confirmed) task', async () => {
+      const task = makeTask({ id: 'optimistic-abc123' });
+      const { fixture } = await render(BoardColumn, {
+        inputs: { title: 'To Do', status: 'todo', tasks: [task] },
+      });
+      const card = (fixture.nativeElement as HTMLElement).querySelector('app-task-card')!;
+      expect(card).toHaveClass('cdk-drag-disabled');
+    });
   });
 });

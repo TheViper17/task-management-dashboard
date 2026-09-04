@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import type { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
@@ -12,6 +13,9 @@ import { TaskDialogService } from '../../../tasks/task-dialog.service';
 import { StatCardsGrid } from '../../components/stat-cards-grid/stat-cards-grid';
 import { TaskToolbar } from '../../components/task-toolbar/task-toolbar';
 import { BoardColumn } from '../../components/board-column/board-column';
+import { boardColumnListId, computeTaskOrderPatches } from '../../utils/board-drag-drop.utils';
+
+const BOARD_STATUSES: readonly TaskStatus[] = ['todo', 'in_progress', 'done'];
 
 /**
  * The dashboard screen: stat cards, filter/search toolbar, and the 3-column
@@ -34,6 +38,9 @@ export class DashboardPage {
   private readonly statisticsStore = inject(StatisticsStore);
   private readonly dialog = inject(MatDialog);
   private readonly taskDialog = inject(TaskDialogService);
+
+  /** Every column connects to every column (including itself) so a card can be dragged anywhere. */
+  protected readonly connectedLists = BOARD_STATUSES.map(boardColumnListId);
 
   protected readonly statistics = computed(() =>
     mergeLiveStatistics(this.statisticsStore.statistics(), this.taskStore.counts()),
@@ -80,5 +87,20 @@ export class DashboardPage {
         // errorInterceptor already surfaced a snackbar for the failure.
       });
     });
+  }
+
+  /**
+   * Drag-and-drop between/within columns. `BoardColumn` forwards the raw
+   * CDK event unchanged because a cross-column move needs both columns'
+   * current order at once, which no single `BoardColumn` instance has.
+   * The actual reorder math lives in `computeTaskOrderPatches` — a pure
+   * function, tested directly — this just applies whatever it returns.
+   */
+  protected onTaskMoved(event: CdkDragDrop<readonly Task[]>): void {
+    for (const patch of computeTaskOrderPatches(event)) {
+      this.taskStore.move(patch.taskId, patch.status, patch.order).catch(() => {
+        // errorInterceptor already surfaced a snackbar for the failure.
+      });
+    }
   }
 }

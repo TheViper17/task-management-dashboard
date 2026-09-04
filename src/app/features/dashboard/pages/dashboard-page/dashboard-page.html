@@ -53,21 +53,30 @@
     <div class="dashboard-page__board">
       <app-board-column
         title="TO DO"
+        status="todo"
         [tasks]="taskStore.columns().todo"
+        [connectedLists]="connectedLists"
         (taskEdit)="onEditTask($event)"
         (taskDelete)="onDeleteTask($event)"
+        (taskMoved)="onTaskMoved($event)"
       />
       <app-board-column
         title="IN PROGRESS"
+        status="in_progress"
         [tasks]="taskStore.columns().in_progress"
+        [connectedLists]="connectedLists"
         (taskEdit)="onEditTask($event)"
         (taskDelete)="onDeleteTask($event)"
+        (taskMoved)="onTaskMoved($event)"
       />
       <app-board-column
         title="DONE"
+        status="done"
         [tasks]="taskStore.columns().done"
+        [connectedLists]="connectedLists"
         (taskEdit)="onEditTask($event)"
         (taskDelete)="onDeleteTask($event)"
+        (taskMoved)="onTaskMoved($event)"
       />
     </div>
   }

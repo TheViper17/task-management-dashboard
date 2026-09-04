@@ -39,6 +39,7 @@ describe('DashboardPage', () => {
     setFilters: ReturnType<typeof vi.fn>;
     remove: ReturnType<typeof vi.fn>;
     reload: ReturnType<typeof vi.fn>;
+    move: ReturnType<typeof vi.fn>;
   };
   let statisticsStoreStub: { statistics: () => unknown[] };
   let dialogOpenSpy: ReturnType<typeof vi.fn>;
@@ -50,7 +51,7 @@ describe('DashboardPage', () => {
     error?: Error;
   }
 
-  function setup(options: SetupOptions = {}): ReturnType<typeof render> {
+  function setup(options: SetupOptions = {}): ReturnType<typeof render<DashboardPage>> {
     const { todoTasks = [], isLoading = false, error = undefined } = options;
     taskStoreStub = {
       filters: () => DEFAULT_TASK_FILTERS,
@@ -62,6 +63,7 @@ describe('DashboardPage', () => {
       setFilters: vi.fn(),
       remove: vi.fn().mockResolvedValue(undefined),
       reload: vi.fn(),
+      move: vi.fn().mockResolvedValue(undefined),
     };
     statisticsStoreStub = { statistics: () => [] };
     dialogOpenSpy = vi.fn();
@@ -162,4 +164,11 @@ describe('DashboardPage', () => {
       expect(taskStoreStub.reload).toHaveBeenCalled();
     });
   });
+
+  // Drag-and-drop's reorder math (computeTaskOrderPatches) is pure and
+  // tested directly in board-drag-drop.utils.spec.ts — no fake pointer
+  // events or component rendering needed there. onTaskMoved itself is a
+  // one-line adapter (apply whatever patches that function returns), and
+  // was verified live in a real browser (see the phase notes) rather than
+  // duplicating that coverage here.
 });

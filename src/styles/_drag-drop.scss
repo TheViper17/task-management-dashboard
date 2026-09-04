@@ -1,0 +1,21 @@
+// Angular CDK's drag preview/placeholder are attached to document.body while
+// dragging — outside any component's view encapsulation — so these can only
+// be styled globally, not from board-column.scss.
+@use 'tokens' as *;
+
+.cdk-drag-preview {
+  box-shadow: var(--app-elevation-overlay);
+  border-radius: var(--app-radius-md);
+}
+
+.cdk-drag-placeholder {
+  opacity: 0.4;
+}
+
+.cdk-drag-animating {
+  transition: transform var(--app-motion-base) var(--app-easing-standard);
+}
+
+.cdk-drop-list-dragging .board-column__drag-item:not(.cdk-drag-placeholder) {
+  transition: transform var(--app-motion-base) var(--app-easing-standard);
+}

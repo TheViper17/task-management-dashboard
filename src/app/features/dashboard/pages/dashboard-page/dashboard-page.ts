@@ -1,10 +1,13 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
 import { TaskStore } from '../../../../core/stores/task.store';
 import { StatisticsStore } from '../../../../core/stores/statistics.store';
 import { mergeLiveStatistics } from '../../../../core/utils/statistic.utils';
 import type { TaskPriority, TaskStatus, Task } from '../../../../core/models/task.model';
 import { ConfirmDialog } from '../../../../shared/ui/confirm-dialog/confirm-dialog';
+import { Skeleton } from '../../../../shared/ui/skeleton/skeleton';
 import { TaskDialogService } from '../../../tasks/task-dialog.service';
 import { StatCardsGrid } from '../../components/stat-cards-grid/stat-cards-grid';
 import { TaskToolbar } from '../../components/task-toolbar/task-toolbar';
@@ -22,7 +25,7 @@ import { BoardColumn } from '../../components/board-column/board-column';
 @Component({
   selector: 'app-dashboard-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [StatCardsGrid, TaskToolbar, BoardColumn],
+  imports: [MatButtonModule, MatIconModule, Skeleton, StatCardsGrid, TaskToolbar, BoardColumn],
   templateUrl: './dashboard-page.html',
   styleUrl: './dashboard-page.scss',
 })
@@ -34,6 +37,15 @@ export class DashboardPage {
 
   protected readonly statistics = computed(() =>
     mergeLiveStatistics(this.statisticsStore.statistics(), this.taskStore.counts()),
+  );
+
+  /**
+   * True only for the *first* load (no tasks yet) — a later `reload()`
+   * setting `isLoading` again shouldn't blank an already-populated board
+   * back to skeletons.
+   */
+  protected readonly isInitialLoading = computed(
+    () => this.taskStore.isLoading() && this.taskStore.tasks().length === 0,
   );
 
   protected onStatusChange(status: TaskStatus | 'all'): void {

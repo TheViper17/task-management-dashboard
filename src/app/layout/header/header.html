@@ -1,4 +1,13 @@
 <header class="header">
+  <button
+    type="button"
+    class="header__icon-button header__menu-button"
+    aria-label="Toggle navigation menu"
+    (click)="menuClick.emit()"
+  >
+    <mat-icon aria-hidden="true">menu</mat-icon>
+  </button>
+
   <div class="header__brand">
     <span class="header__logo">
       <mat-icon aria-hidden="true">dashboard</mat-icon>

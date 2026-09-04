@@ -50,7 +50,11 @@ export class TaskDialogService {
   private open(task: Task | null): Observable<CreateTaskDto | undefined> {
     const ref = this.dialog.open<TaskFormDialog, TaskFormDialogData, CreateTaskDto>(
       TaskFormDialog,
-      { width: '560px', data: { task, assignees: this.userStore.users() } },
+      {
+        width: '560px',
+        maxWidth: '92vw', // never forces horizontal scroll on a narrow phone
+        data: { task, assignees: this.userStore.users() },
+      },
     );
     return ref.afterClosed();
   }

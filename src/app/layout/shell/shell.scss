@@ -4,16 +4,43 @@
   height: 100vh;
 }
 
+.shell__skip-link {
+  position: absolute;
+  top: -100%;
+  left: var(--app-space-3);
+  z-index: var(--app-z-overlay);
+  padding: var(--app-space-2) var(--app-space-4);
+  border-radius: var(--app-radius-md);
+  background: var(--app-primary);
+  color: var(--app-primary-contrast);
+  text-decoration: none;
+  font-weight: 600;
+  transition: top var(--app-motion-fast) var(--app-easing-standard);
+
+  &:focus {
+    top: var(--app-space-3);
+  }
+}
+
 .shell__body {
-  display: flex;
   flex: 1 1 auto;
   min-height: 0;
 }
 
+.shell__sidenav {
+  width: var(--app-sidebar-width);
+  border-right: 1px solid var(--app-border);
+}
+
 .shell__content {
-  flex: 1 1 auto;
-  min-width: 0;
+  height: 100%;
   overflow-y: auto;
   background: var(--app-bg);
   padding: var(--app-space-6);
+
+  // The skip-link's target — outline would otherwise flash on programmatic
+  // focus even though the user didn't click/tab to it directly.
+  &:focus {
+    outline: none;
+  }
 }

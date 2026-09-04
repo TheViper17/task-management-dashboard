@@ -1,8 +1,14 @@
+@use 'tokens' as *;
+
 .task-form {
   display: flex;
   flex-direction: column;
   gap: var(--app-space-2);
-  min-width: 420px;
+  // A comfortable width on desktop, but never wider than the viewport can
+  // give it — MatDialog's own maxWidth (see task-dialog.service.ts) already
+  // caps the dialog itself; this keeps the form from forcing a scrollbar
+  // inside that.
+  width: min(420px, 100%);
 
   mat-form-field {
     width: 100%;
@@ -13,6 +19,10 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--app-space-4);
+
+  @include below('mobile') {
+    grid-template-columns: 1fr;
+  }
 }
 
 .task-form__tags {

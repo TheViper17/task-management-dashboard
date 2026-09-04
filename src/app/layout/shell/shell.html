@@ -1,12 +1,27 @@
 <div class="shell">
+  <a class="shell__skip-link" href="#main-content">Skip to main content</a>
+
   <app-header
     [currentUserInitials]="currentUser()?.avatar ?? null"
     (searchChange)="onSearchChange($event)"
+    (menuClick)="onMenuToggle()"
   />
-  <div class="shell__body">
-    <app-sidebar (newTaskClick)="onNewTask()" />
-    <main class="shell__content">
-      <router-outlet />
-    </main>
-  </div>
+
+  <mat-sidenav-container class="shell__body">
+    <mat-sidenav
+      class="shell__sidenav"
+      [mode]="isHandset() ? 'over' : 'side'"
+      [opened]="!isHandset()"
+      [fixedInViewport]="isHandset()"
+      [fixedTopGap]="isHandset() ? 64 : 0"
+    >
+      <app-sidebar (newTaskClick)="onNewTask()" (linkClick)="onSidebarLinkClick()" />
+    </mat-sidenav>
+
+    <mat-sidenav-content class="shell__content-area">
+      <main id="main-content" class="shell__content" tabindex="-1">
+        <router-outlet />
+      </main>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
 </div>

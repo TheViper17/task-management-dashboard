@@ -1,7 +1,16 @@
-import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
+import { BreakpointObserver } from '@angular/cdk/layout';
+import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { RouterOutlet } from '@angular/router';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
 import { TaskStore } from '../../core/stores/task.store';
 import { UserStore } from '../../core/stores/user.store';
 import { TaskDialogService } from '../../features/tasks/task-dialog.service';
@@ -11,17 +20,24 @@ import { Sidebar } from '../sidebar/sidebar';
 /** How long to wait after the last keystroke before filtering the board. */
 const SEARCH_DEBOUNCE_MS = 300;
 
+/** Matches the `below('tablet')` SCSS mixin — kept in one place, see _tokens.scss. */
+const HANDSET_QUERY = '(max-width: 1023.98px)';
+
 /**
  * The persistent app shell: header + sidebar + routed content. This is the
  * one "smart" piece of layout — it owns the global search box's debounce
  * (a textbook use of `debounceTime`/`distinctUntilChanged`, satisfying the
- * "proper RxJS operator usage" requirement) and resolves the header's
- * current-user avatar. Everything else it renders is presentational.
+ * "proper RxJS operator usage" requirement), resolves the header's
+ * current-user avatar, and switches the sidebar between a permanently
+ * visible rail (desktop) and an overlay drawer (tablet/mobile) via CDK's
+ * `BreakpointObserver` — a real Angular layout primitive, not just a CSS
+ * media query, because `MatSidenav`'s `mode` is a bound TS property.
+ * Everything else it renders is presentational.
  */
 @Component({
   selector: 'app-shell',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterOutlet, Header, Sidebar],
+  imports: [RouterOutlet, MatSidenavModule, Header, Sidebar],
   templateUrl: './shell.html',
   styleUrl: './shell.scss',
 })
@@ -29,10 +45,18 @@ export class Shell {
   private readonly taskStore = inject(TaskStore);
   private readonly userStore = inject(UserStore);
   private readonly taskDialog = inject(TaskDialogService);
+  private readonly breakpointObserver = inject(BreakpointObserver);
+
+  private readonly drawer = viewChild.required(MatSidenav);
 
   // No auth in this app (out of scope per the brief) — the first user in
   // the mocked directory stands in for "the current user".
   readonly currentUser = computed(() => this.userStore.users()[0] ?? null);
+
+  readonly isHandset = toSignal(
+    this.breakpointObserver.observe(HANDSET_QUERY).pipe(map((result) => result.matches)),
+    { initialValue: false },
+  );
 
   private readonly searchTerm = signal('');
 
@@ -48,5 +72,16 @@ export class Shell {
 
   onNewTask(): void {
     this.taskDialog.createTask();
+  }
+
+  onMenuToggle(): void {
+    void this.drawer().toggle();
+  }
+
+  /** Closes the drawer after navigating, but only on handset — desktop's 'side' mode stays open. */
+  onSidebarLinkClick(): void {
+    if (this.isHandset()) {
+      void this.drawer().close();
+    }
   }
 }

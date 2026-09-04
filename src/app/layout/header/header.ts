@@ -23,6 +23,8 @@ export class Header {
 
   readonly searchChange = output<string>();
   readonly notificationsClick = output<void>();
+  /** Toggles the navigation drawer — the button is only visible below desktop width (see header.scss). */
+  readonly menuClick = output<void>();
 
   readonly searchControl = new FormControl('', { nonNullable: true });
 

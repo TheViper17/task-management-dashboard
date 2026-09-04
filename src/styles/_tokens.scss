@@ -3,7 +3,11 @@
 // -----------------------------------------------------------------------------
 // Single source of truth for colour, spacing, radius, elevation and layout.
 // Values are derived from the Figma design and the mock-data palette
-// (see mock-api generator: #1976D2 / #388E3C / #FF6F00 / #D32F2F).
+// (see mock-api generator: #1976D2 / #388E3C / #FF6F00 / #D32F2F), with the
+// warning/danger/muted-text shades darkened slightly from those originals —
+// verified against WCAG 2.1 AA (4.5:1) on every surface they're actually
+// rendered on; the originals fell short (as low as 2.86:1 for medium-priority
+// badge text). See PHASE 6 notes in the README for the computed ratios.
 //
 // Two layers are exposed:
 //   1. CSS custom properties on :root  -> usable at runtime and in component SCSS
@@ -20,26 +24,29 @@
   --app-primary-contrast: #ffffff;
 
   // Priority -------------------------------------------------------------------
-  --app-priority-high: #d32f2f;
+  // #cb2d2d / #b45202 are darkened from the Figma/mock-data #d32f2f / #ed6c02 —
+  // both originals fell short of 4.5:1 against their own badge surface below
+  // (4.35:1 and 2.86:1 respectively); these clear 4.5:1 on every surface used.
+  --app-priority-high: #cb2d2d;
   --app-priority-high-surface: #fdecea;
-  --app-priority-medium: #ed6c02;
+  --app-priority-medium: #b45202;
   --app-priority-medium-surface: #fff4e5;
   --app-priority-low: #2e7d32;
   --app-priority-low-surface: #edf7ed;
 
   // Status (kanban column accents, used for card hover borders) ---------------
   --app-status-todo: #1976d2;
-  --app-status-in-progress: #ed6c02;
+  --app-status-in-progress: #b45202;
   --app-status-done: #2e7d32;
 
   // Overdue card treatment --------------------------------------------------
   --app-overdue-surface: #fdecea;
-  --app-overdue-border: #d32f2f;
+  --app-overdue-border: #cb2d2d;
 
   // Deltas (stat card change labels) --------------------------------------
   --app-delta-positive: #2e7d32;
-  --app-delta-negative: #d32f2f;
-  --app-delta-neutral: #6b7280;
+  --app-delta-negative: #cb2d2d;
+  --app-delta-neutral: #69707d;
 
   // Surfaces & lines ------------------------------------------------------
   --app-bg: #f5f6f8;
@@ -50,7 +57,7 @@
 
   // Text ----------------------------------------------------------------------
   --app-text: #1f2430;
-  --app-text-muted: #6b7280;
+  --app-text-muted: #69707d; // darkened from #6b7280 — see the a11y note above
 
   // Spacing scale (4px base) --------------------------------------------------
   --app-space-1: 4px;

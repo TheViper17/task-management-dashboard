@@ -1,3 +1,5 @@
+@use 'tokens' as *;
+
 .header {
   display: flex;
   align-items: center;
@@ -6,6 +8,11 @@
   padding: 0 var(--app-space-6);
   background: var(--app-surface);
   border-bottom: 1px solid var(--app-border);
+
+  @include below('tablet') {
+    gap: var(--app-space-3);
+    padding: 0 var(--app-space-3);
+  }
 }
 
 .header__brand {
@@ -37,6 +44,11 @@
   font-weight: 700;
   color: var(--app-primary);
   white-space: nowrap;
+
+  @include below('mobile') {
+    // The logo mark alone is enough to identify the app once space is tight.
+    display: none;
+  }
 }
 
 .header__search {
@@ -102,6 +114,20 @@
 
   &:hover {
     background: var(--app-surface-hover);
+  }
+}
+
+.header__menu-button {
+  // Only shown below desktop width — Shell's sidenav is always visible
+  // ('side' mode) at desktop width, so there's nothing to toggle there.
+  // Declared *after* .header__icon-button so this display:none wins the
+  // cascade at equal specificity (source order matters here — a real bug
+  // this component had until it was verified against an actual desktop
+  // screenshot, not just read back as code).
+  display: none;
+
+  @include below('tablet') {
+    display: inline-flex;
   }
 }
 

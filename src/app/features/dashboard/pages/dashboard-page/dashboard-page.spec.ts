@@ -33,20 +33,35 @@ describe('DashboardPage', () => {
     filters: () => TaskFilters;
     columns: () => Record<string, Task[]>;
     counts: () => { total: number; completed: number; inProgress: number; overdue: number };
+    tasks: () => Task[];
+    isLoading: () => boolean;
+    error: () => Error | undefined;
     setFilters: ReturnType<typeof vi.fn>;
     remove: ReturnType<typeof vi.fn>;
+    reload: ReturnType<typeof vi.fn>;
   };
   let statisticsStoreStub: { statistics: () => unknown[] };
   let dialogOpenSpy: ReturnType<typeof vi.fn>;
   let taskDialogStub: { createTask: ReturnType<typeof vi.fn>; editTask: ReturnType<typeof vi.fn> };
 
-  function setup(todoTasks: Task[] = []): ReturnType<typeof render> {
+  interface SetupOptions {
+    todoTasks?: Task[];
+    isLoading?: boolean;
+    error?: Error;
+  }
+
+  function setup(options: SetupOptions = {}): ReturnType<typeof render> {
+    const { todoTasks = [], isLoading = false, error = undefined } = options;
     taskStoreStub = {
       filters: () => DEFAULT_TASK_FILTERS,
       columns: () => ({ todo: todoTasks, in_progress: [], done: [] }),
       counts: () => ({ total: todoTasks.length, completed: 0, inProgress: 0, overdue: 0 }),
+      tasks: () => todoTasks,
+      isLoading: () => isLoading,
+      error: () => error,
       setFilters: vi.fn(),
       remove: vi.fn().mockResolvedValue(undefined),
+      reload: vi.fn(),
     };
     statisticsStoreStub = { statistics: () => [] };
     dialogOpenSpy = vi.fn();
@@ -90,7 +105,7 @@ describe('DashboardPage', () => {
   it('delegates a card\'s "Edit" to TaskDialogService.editTask() with that task', async () => {
     const user = userEvent.setup();
     const task = makeTask({ id: 'task-1' });
-    await setup([task]);
+    await setup({ todoTasks: [task] });
 
     await user.click(screen.getByRole('button', { name: /more actions/i }));
     await user.click(await screen.findByRole('menuitem', { name: /edit/i }));
@@ -100,7 +115,7 @@ describe('DashboardPage', () => {
 
   it('opens a confirm dialog and calls TaskStore.remove when confirmed', async () => {
     const user = userEvent.setup();
-    await setup([makeTask({ id: 'task-1', title: 'Design homepage' })]);
+    await setup({ todoTasks: [makeTask({ id: 'task-1', title: 'Design homepage' })] });
     dialogOpenSpy.mockReturnValue({ afterClosed: () => of(true) });
 
     await user.click(screen.getByRole('button', { name: /more actions/i }));
@@ -112,12 +127,39 @@ describe('DashboardPage', () => {
 
   it('does not call TaskStore.remove when the confirm dialog is cancelled', async () => {
     const user = userEvent.setup();
-    await setup([makeTask({ id: 'task-1', title: 'Design homepage' })]);
+    await setup({ todoTasks: [makeTask({ id: 'task-1', title: 'Design homepage' })] });
     dialogOpenSpy.mockReturnValue({ afterClosed: () => of(false) });
 
     await user.click(screen.getByRole('button', { name: /more actions/i }));
     await user.click(await screen.findByRole('menuitem', { name: /delete/i }));
 
     expect(taskStoreStub.remove).not.toHaveBeenCalled();
+  });
+
+  describe('loading and error states', () => {
+    it('shows a skeleton instead of the board on the initial load (no tasks yet)', async () => {
+      await setup({ isLoading: true });
+
+      expect(screen.getByRole('status', { name: /loading dashboard/i })).toBeInTheDocument();
+      expect(screen.queryByText('TO DO')).not.toBeInTheDocument();
+    });
+
+    it('does not show the skeleton on a later reload once tasks are already loaded', async () => {
+      await setup({ todoTasks: [makeTask()], isLoading: true });
+
+      expect(screen.queryByRole('status', { name: /loading dashboard/i })).not.toBeInTheDocument();
+      expect(screen.getByText('TO DO')).toBeInTheDocument();
+    });
+
+    it('shows an error state with a Retry button when the load fails', async () => {
+      const user = userEvent.setup();
+      await setup({ error: new Error('network down') });
+
+      expect(screen.getByRole('alert')).toHaveTextContent(/couldn't load your tasks/i);
+      expect(screen.queryByText('TO DO')).not.toBeInTheDocument();
+
+      await user.click(screen.getByRole('button', { name: /retry/i }));
+      expect(taskStoreStub.reload).toHaveBeenCalled();
+    });
   });
 });

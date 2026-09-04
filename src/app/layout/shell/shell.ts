@@ -11,6 +11,7 @@ import { BreakpointObserver } from '@angular/cdk/layout';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { RouterOutlet } from '@angular/router';
 import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
+import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import { TaskStore } from '../../core/stores/task.store';
 import { UserStore } from '../../core/stores/user.store';
 import { TaskDialogService } from '../../features/tasks/task-dialog.service';
@@ -37,7 +38,7 @@ const HANDSET_QUERY = '(max-width: 1023.98px)';
 @Component({
   selector: 'app-shell',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterOutlet, MatSidenavModule, Header, Sidebar],
+  imports: [RouterOutlet, MatSidenavModule, TranslatePipe, Header, Sidebar],
   templateUrl: './shell.html',
   styleUrl: './shell.scss',
 })

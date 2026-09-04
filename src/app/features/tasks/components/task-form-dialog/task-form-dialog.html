@@ -1,4 +1,6 @@
-<h2 mat-dialog-title>{{ data.task ? 'Edit Task' : 'New Task' }}</h2>
+<h2 mat-dialog-title>
+  {{ (data.task ? 'taskFormDialog.editTitle' : 'taskFormDialog.newTitle') | translate }}
+</h2>
 <mat-dialog-content>
   <app-task-form
     [task]="data.task"

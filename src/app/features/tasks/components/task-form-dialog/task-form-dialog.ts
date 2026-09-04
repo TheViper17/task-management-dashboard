@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { TranslatePipe } from '../../../../core/i18n/translate.pipe';
 import type { Assignee, CreateTaskDto, Task } from '../../../../core/models/task.model';
 import { TaskForm } from '../task-form/task-form';
 
@@ -12,7 +13,7 @@ export interface TaskFormDialogData {
 @Component({
   selector: 'app-task-form-dialog',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [MatDialogModule, TaskForm],
+  imports: [MatDialogModule, TaskForm, TranslatePipe],
   templateUrl: './task-form-dialog.html',
 })
 export class TaskFormDialog {

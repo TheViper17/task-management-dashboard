@@ -1,5 +1,7 @@
 <div class="placeholder-page">
   <mat-icon aria-hidden="true">{{ icon() }}</mat-icon>
-  <h1>{{ title() }}</h1>
-  <p>{{ subtitle() }}</p>
+  <h1>{{ titleKey() | translate }}</h1>
+  @if (subtitleKey(); as key) {
+    <p>{{ key | translate }}</p>
+  }
 </div>

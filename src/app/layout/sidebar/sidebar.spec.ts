@@ -1,6 +1,7 @@
 import { provideRouter } from '@angular/router';
 import { render, screen } from '@testing-library/angular';
 import userEvent from '@testing-library/user-event';
+import { en } from '../../core/i18n/translations/en';
 import { Sidebar } from './sidebar';
 import { NAV_ITEMS } from './nav-items';
 
@@ -9,7 +10,10 @@ describe('Sidebar', () => {
     await render(Sidebar, { providers: [provideRouter([])] });
 
     for (const item of NAV_ITEMS) {
-      expect(screen.getByText(item.label)).toBeInTheDocument();
+      // Cast: every NAV_ITEMS key happens to resolve to a plain string, but
+      // `TranslationKey` as a type also covers plural-map keys, which
+      // getByText's Matcher type can't accept.
+      expect(screen.getByText(en[item.labelKey] as string)).toBeInTheDocument();
     }
   });
 

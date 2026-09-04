@@ -35,6 +35,23 @@ describe('StatCard', () => {
     expect(screen.getByText('Same as yesterday')).toBeInTheDocument();
   });
 
+  it('falls back to the raw title/changeLabel text for an id it does not recognise', async () => {
+    // title/changeLabel are free-text from the (mock) statistics API, not
+    // this app's own template — an id outside the known four should
+    // degrade to whatever the "backend" sent, not blank out.
+    await render(StatCard, {
+      inputs: {
+        statistic: makeStatistic({
+          id: 'stat-999',
+          title: 'Custom Metric',
+          changeLabel: 'this quarter',
+        }),
+      },
+    });
+    expect(screen.getByText('Custom Metric')).toBeInTheDocument();
+    expect(screen.getByText('+12 this quarter')).toBeInTheDocument();
+  });
+
   it('applies the delta tone class matching changeType', async () => {
     const { fixture } = await render(StatCard, {
       inputs: { statistic: makeStatistic({ changeType: 'negative' }) },

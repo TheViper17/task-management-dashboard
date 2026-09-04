@@ -15,7 +15,7 @@ describe('App', () => {
                 import('./shared/ui/placeholder-page/placeholder-page').then(
                   (m) => m.PlaceholderPage,
                 ),
-              data: { title: 'Home' },
+              data: { titleKey: 'nav.dashboard' },
             },
           ],
           withComponentInputBinding(),
@@ -23,6 +23,6 @@ describe('App', () => {
       ],
     });
 
-    expect(await screen.findByRole('heading', { name: 'Home' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Dashboard' })).toBeInTheDocument();
   });
 });

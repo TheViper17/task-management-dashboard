@@ -1,3 +1,5 @@
+import type { TranslateParams } from '../i18n/translation.model';
+import type { TranslationKey } from '../i18n/translations/en';
 import type { Task } from '../models/task.model';
 import { daysUntil } from './task.utils';
 
@@ -30,9 +32,17 @@ export function parseIsoDateLocal(iso: string): Date {
 
 export type DueDateTone = 'overdue' | 'done' | 'default';
 
+/**
+ * A translation key + params, not a formatted string — this file is plain,
+ * framework-agnostic code (no `inject()`), independently unit-tested against
+ * *which* message and *what* data, not against final English wording. The
+ * caller (`DueDateChip`/`ActivityFeed`) resolves the actual text via
+ * `i18n.translate(key, params)`, in whichever language is active.
+ */
 export interface DueDateInfo {
   icon: string;
-  label: string;
+  key: TranslationKey;
+  params?: TranslateParams;
   tone: DueDateTone;
 }
 
@@ -48,32 +58,28 @@ export function describeDueDate(
   completedAt?: string,
 ): DueDateInfo {
   if (status === 'done') {
-    return { icon: 'check_circle', label: formatCompletedLabel(completedAt), tone: 'done' };
+    return { icon: 'check_circle', tone: 'done', ...describeCompleted(completedAt) };
   }
 
   const days = daysUntil(dueDate);
   if (days < 0) {
-    return { icon: 'warning', label: `Overdue by ${pluralDays(-days)}`, tone: 'overdue' };
+    return { icon: 'warning', key: 'dueDate.overdueBy', params: { count: -days }, tone: 'overdue' };
   }
   if (days === 0) {
-    return { icon: 'event', label: 'Due today', tone: 'default' };
+    return { icon: 'event', key: 'dueDate.dueToday', tone: 'default' };
   }
   if (days === 1) {
-    return { icon: 'event', label: 'Due tomorrow', tone: 'default' };
+    return { icon: 'event', key: 'dueDate.dueTomorrow', tone: 'default' };
   }
-  return { icon: 'event', label: `Due in ${days} days`, tone: 'default' };
+  return { icon: 'event', key: 'dueDate.dueInDays', params: { count: days }, tone: 'default' };
 }
 
-function pluralDays(count: number): string {
-  return `${count} day${count === 1 ? '' : 's'}`;
-}
-
-function formatCompletedLabel(completedAt: string | undefined): string {
-  if (!completedAt) return 'Completed';
+function describeCompleted(completedAt: string | undefined): Pick<DueDateInfo, 'key' | 'params'> {
+  if (!completedAt) return { key: 'common.completed' };
   const days = daysUntil(completedAt.slice(0, 10));
-  if (days === 0) return 'Completed today';
-  if (days === -1) return 'Completed yesterday';
-  return 'Completed';
+  if (days === 0) return { key: 'dueDate.completedToday' };
+  if (days === -1) return { key: 'dueDate.completedYesterday' };
+  return { key: 'common.completed' };
 }
 
 const MINUTE_MS = 60_000;
@@ -81,21 +87,29 @@ const HOUR_MS = 60 * MINUTE_MS;
 const DAY_MS = 24 * HOUR_MS;
 const WEEK_MS = 7 * DAY_MS;
 
+/** A translation key + params describing a relative time — see `DueDateInfo`'s doc comment. */
+export interface RelativeTimeInfo {
+  key: TranslationKey;
+  params?: TranslateParams;
+}
+
 /**
- * Formats an ISO datetime as "N minutes/hours/days/weeks ago" for the
+ * Describes an ISO datetime as "N minutes/hours/days/weeks ago" for the
  * activity feed. Takes `now` as a parameter (defaulting to `new Date()`)
  * purely so tests can pass a fixed instant instead of mocking the clock.
  */
-export function formatRelativeTime(iso: string, now: Date = new Date()): string {
+export function describeRelativeTime(iso: string, now: Date = new Date()): RelativeTimeInfo {
   const diffMs = Math.max(0, now.getTime() - new Date(iso).getTime());
 
-  if (diffMs < MINUTE_MS) return 'just now';
-  if (diffMs < HOUR_MS) return pluralUnit(Math.floor(diffMs / MINUTE_MS), 'minute');
-  if (diffMs < DAY_MS) return pluralUnit(Math.floor(diffMs / HOUR_MS), 'hour');
-  if (diffMs < WEEK_MS) return pluralUnit(Math.floor(diffMs / DAY_MS), 'day');
-  return pluralUnit(Math.floor(diffMs / WEEK_MS), 'week');
-}
-
-function pluralUnit(count: number, unit: string): string {
-  return `${count} ${unit}${count === 1 ? '' : 's'} ago`;
+  if (diffMs < MINUTE_MS) return { key: 'time.justNow' };
+  if (diffMs < HOUR_MS) {
+    return { key: 'time.minutesAgo', params: { count: Math.floor(diffMs / MINUTE_MS) } };
+  }
+  if (diffMs < DAY_MS) {
+    return { key: 'time.hoursAgo', params: { count: Math.floor(diffMs / HOUR_MS) } };
+  }
+  if (diffMs < WEEK_MS) {
+    return { key: 'time.daysAgo', params: { count: Math.floor(diffMs / DAY_MS) } };
+  }
+  return { key: 'time.weeksAgo', params: { count: Math.floor(diffMs / WEEK_MS) } };
 }

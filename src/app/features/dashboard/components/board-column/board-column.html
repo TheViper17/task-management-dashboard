@@ -1,4 +1,4 @@
-<section class="board-column" [attr.aria-label]="title() + ' column'">
+<section class="board-column" [attr.aria-label]="regionLabel()">
   <header class="board-column__header">
     <h2>{{ title() }}</h2>
     <span class="board-column__count">{{ tasks().length }}</span>
@@ -24,7 +24,7 @@
         (quickEdit)="taskQuickEdit.emit({ task, patch: $event })"
       />
     } @empty {
-      <p class="board-column__empty">No tasks here.</p>
+      <p class="board-column__empty">{{ 'board.empty' | translate }}</p>
     }
   </div>
 </section>

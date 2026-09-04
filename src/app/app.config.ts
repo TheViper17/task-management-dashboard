@@ -1,10 +1,16 @@
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import type { ApplicationConfig } from '@angular/core';
-import { provideBrowserGlobalErrorListeners, provideZonelessChangeDetection } from '@angular/core';
+import {
+  inject,
+  provideAppInitializer,
+  provideBrowserGlobalErrorListeners,
+  provideZonelessChangeDetection,
+} from '@angular/core';
 import { provideRouter, withComponentInputBinding, withViewTransitions } from '@angular/router';
 import { cacheInterceptor } from './core/interceptors/cache.interceptor';
 import { errorInterceptor } from './core/interceptors/error.interceptor';
 import { retryInterceptor } from './core/interceptors/retry.interceptor';
+import { TranslationService } from './core/i18n/translation.service';
 import { API_BASE_URL, CACHE_TTL_MS } from './core/tokens/api.tokens';
 import { routes } from './app.routes';
 
@@ -18,6 +24,14 @@ export const appConfig: ApplicationConfig = {
     // Explicit even though Angular 22 defaults to zoneless when zone.js
     // isn't installed — states the intent rather than relying on an absence.
     provideZonelessChangeDetection(),
+
+    // Forces TranslationService to construct here, before the root
+    // component (and everything under it, including the first Angular CDK
+    // component to ever ask for `Directionality`) — see its class doc
+    // comment for why `document.dir` must already be correct by then.
+    provideAppInitializer(() => {
+      inject(TranslationService);
+    }),
 
     provideRouter(
       routes,

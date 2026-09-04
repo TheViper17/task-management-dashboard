@@ -5,7 +5,7 @@
   flex-shrink: 0;
   padding: var(--app-space-6) var(--app-space-4);
   background: var(--app-surface);
-  border-right: 1px solid var(--app-border);
+  border-inline-end: 1px solid var(--app-border);
   overflow-y: auto;
 }
 

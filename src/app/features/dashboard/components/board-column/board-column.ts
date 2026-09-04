@@ -1,6 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
 import type { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { CdkDrag, CdkDropList } from '@angular/cdk/drag-drop';
+import { TranslatePipe } from '../../../../core/i18n/translate.pipe';
+import { TranslationService } from '../../../../core/i18n/translation.service';
 import type { Task, TaskPatch, TaskStatus } from '../../../../core/models/task.model';
 import { isOptimisticId } from '../../../../core/utils/id.utils';
 import { TaskCard } from '../task-card/task-card';
@@ -17,7 +19,7 @@ import { boardColumnListId } from '../../utils/board-drag-drop.utils';
 @Component({
   selector: 'app-board-column',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TaskCard, CdkDropList, CdkDrag],
+  imports: [TaskCard, CdkDropList, CdkDrag, TranslatePipe],
   templateUrl: './board-column.html',
   styleUrl: './board-column.scss',
 })
@@ -37,7 +39,12 @@ export class BoardColumn {
   readonly taskQuickEdit = output<{ task: Task; patch: TaskPatch }>();
   readonly taskMoved = output<CdkDragDrop<readonly Task[]>>();
 
+  private readonly i18n = inject(TranslationService);
+
   protected readonly listId = computed(() => boardColumnListId(this.status()));
+  protected readonly regionLabel = computed(() =>
+    this.i18n.translate('board.regionLabel', { title: this.title() }),
+  );
 
   protected isPending(task: Task): boolean {
     return isOptimisticId(task.id);

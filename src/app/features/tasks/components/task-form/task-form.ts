@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, Component, computed, effect, input, output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  input,
+  output,
+} from '@angular/core';
 import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DATE_LOCALE, provideNativeDateAdapter } from '@angular/material/core';
@@ -7,6 +15,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { TranslatePipe } from '../../../../core/i18n/translate.pipe';
+import { TranslationService } from '../../../../core/i18n/translation.service';
 import type { Assignee, CreateTaskDto, Task } from '../../../../core/models/task.model';
 import { parseIsoDateLocal, toIsoDateString } from '../../../../core/utils/date.utils';
 import {
@@ -48,13 +58,23 @@ const MAX_TAGS = 5;
     MatIconModule,
     MatInputModule,
     MatSelectModule,
+    TranslatePipe,
   ],
   // Scoped here, not app-wide (app.config.ts) — the datepicker is only ever
   // used by this form, so its adapter shouldn't ride along in every route's
-  // bundle. MAT_DATE_LOCALE is pinned rather than left to inherit the
-  // browser/OS locale so the due-date field's displayed format (and this
-  // component's own spec, which asserts on it) is deterministic everywhere.
-  providers: [provideNativeDateAdapter(), { provide: MAT_DATE_LOCALE, useValue: 'en-US' }],
+  // bundle. MAT_DATE_LOCALE is read once, at construction, from the app's
+  // current language — not bound reactively to it, because nothing needs
+  // it to be: switching language reloads the page (see
+  // TranslationService's own doc comment), so "correct at construction" is
+  // already "always correct". In English mode this factory returns the
+  // same 'en-US' the tests assert an exact formatted date against.
+  providers: [
+    provideNativeDateAdapter(),
+    {
+      provide: MAT_DATE_LOCALE,
+      useFactory: () => (inject(TranslationService).locale() === 'ar' ? 'ar' : 'en-US'),
+    },
+  ],
   templateUrl: './task-form.html',
   styleUrl: './task-form.scss',
 })

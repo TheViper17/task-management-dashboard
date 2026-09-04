@@ -3,6 +3,8 @@ import type { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { TranslatePipe } from '../../../../core/i18n/translate.pipe';
+import { TranslationService } from '../../../../core/i18n/translation.service';
 import { TaskStore } from '../../../../core/stores/task.store';
 import { StatisticsStore } from '../../../../core/stores/statistics.store';
 import { UserStore } from '../../../../core/stores/user.store';
@@ -30,7 +32,15 @@ const BOARD_STATUSES: readonly TaskStatus[] = ['todo', 'in_progress', 'done'];
 @Component({
   selector: 'app-dashboard-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [MatButtonModule, MatIconModule, Skeleton, StatCardsGrid, TaskToolbar, BoardColumn],
+  imports: [
+    MatButtonModule,
+    MatIconModule,
+    TranslatePipe,
+    Skeleton,
+    StatCardsGrid,
+    TaskToolbar,
+    BoardColumn,
+  ],
   templateUrl: './dashboard-page.html',
   styleUrl: './dashboard-page.scss',
 })
@@ -40,6 +50,7 @@ export class DashboardPage {
   private readonly statisticsStore = inject(StatisticsStore);
   private readonly dialog = inject(MatDialog);
   private readonly taskDialog = inject(TaskDialogService);
+  private readonly i18n = inject(TranslationService);
 
   /** Every column connects to every column (including itself) so a card can be dragged anywhere. */
   protected readonly connectedLists = BOARD_STATUSES.map(boardColumnListId);
@@ -87,9 +98,9 @@ export class DashboardPage {
   protected onDeleteTask(task: Task): void {
     const ref = this.dialog.open(ConfirmDialog, {
       data: {
-        title: 'Delete task?',
-        message: `Delete "${task.title}"? This can't be undone.`,
-        confirmLabel: 'Delete',
+        title: this.i18n.translate('confirmDialog.deleteTitle'),
+        message: this.i18n.translate('confirmDialog.deleteMessage', { title: task.title }),
+        confirmLabel: this.i18n.translate('common.delete'),
         destructive: true,
       },
     });

@@ -1,27 +1,27 @@
 <form [formGroup]="form" (ngSubmit)="onSubmit()" class="task-form" novalidate>
   <mat-form-field appearance="outline">
-    <mat-label>Title</mat-label>
+    <mat-label>{{ 'taskForm.titleLabel' | translate }}</mat-label>
     <input matInput formControlName="title" maxlength="120" />
     @if (form.controls.title.touched && form.controls.title.invalid) {
       <mat-error>
         @if (form.controls.title.hasError('required')) {
-          Title is required.
+          {{ 'taskForm.titleRequired' | translate }}
         } @else if (form.controls.title.hasError('minlength')) {
-          Title must be at least 3 characters.
+          {{ 'taskForm.titleMinLength' | translate }}
         }
       </mat-error>
     }
   </mat-form-field>
 
   <mat-form-field appearance="outline">
-    <mat-label>Description</mat-label>
+    <mat-label>{{ 'taskForm.descriptionLabel' | translate }}</mat-label>
     <textarea matInput formControlName="description" rows="3" maxlength="500"></textarea>
     @if (form.controls.description.touched && form.controls.description.invalid) {
       <mat-error>
         @if (form.controls.description.hasError('required')) {
-          Description is required.
+          {{ 'taskForm.descriptionRequired' | translate }}
         } @else if (form.controls.description.hasError('minlength')) {
-          Description must be at least 10 characters.
+          {{ 'taskForm.descriptionMinLength' | translate }}
         }
       </mat-error>
     }
@@ -29,56 +29,56 @@
 
   <div class="task-form__row">
     <mat-form-field appearance="outline">
-      <mat-label>Status</mat-label>
+      <mat-label>{{ 'taskForm.statusLabel' | translate }}</mat-label>
       <mat-select formControlName="status">
-        <mat-option value="todo">To Do</mat-option>
-        <mat-option value="in_progress">In Progress</mat-option>
-        <mat-option value="done">Done</mat-option>
+        <mat-option value="todo">{{ 'status.todo' | translate }}</mat-option>
+        <mat-option value="in_progress">{{ 'status.inProgress' | translate }}</mat-option>
+        <mat-option value="done">{{ 'status.done' | translate }}</mat-option>
       </mat-select>
     </mat-form-field>
 
     <mat-form-field appearance="outline">
-      <mat-label>Priority</mat-label>
+      <mat-label>{{ 'priority.label' | translate }}</mat-label>
       <mat-select formControlName="priority">
-        <mat-option value="low">Low</mat-option>
-        <mat-option value="medium">Medium</mat-option>
-        <mat-option value="high">High</mat-option>
+        <mat-option value="low">{{ 'priority.low' | translate }}</mat-option>
+        <mat-option value="medium">{{ 'priority.medium' | translate }}</mat-option>
+        <mat-option value="high">{{ 'priority.high' | translate }}</mat-option>
       </mat-select>
     </mat-form-field>
   </div>
 
   <div class="task-form__row">
     <mat-form-field appearance="outline">
-      <mat-label>Due date</mat-label>
+      <mat-label>{{ 'taskForm.dueDateLabel' | translate }}</mat-label>
       <input matInput [matDatepicker]="dueDatePicker" formControlName="dueDate" />
       <mat-datepicker-toggle matIconSuffix [for]="dueDatePicker" />
       <mat-datepicker #dueDatePicker />
       @if (form.controls.dueDate.touched && form.controls.dueDate.invalid) {
         <mat-error>
           @if (form.controls.dueDate.hasError('required')) {
-            Due date is required.
+            {{ 'taskForm.dueDateRequired' | translate }}
           } @else if (form.controls.dueDate.hasError('pastDate')) {
-            Due date can't be in the past.
+            {{ 'taskForm.dueDatePast' | translate }}
           }
         </mat-error>
       }
     </mat-form-field>
 
     <mat-form-field appearance="outline">
-      <mat-label>Assignee</mat-label>
+      <mat-label>{{ 'toolbar.assigneeLabel' | translate }}</mat-label>
       <mat-select formControlName="assigneeId">
         @for (assignee of assignees(); track assignee.id) {
           <mat-option [value]="assignee.id">{{ assignee.name }}</mat-option>
         }
       </mat-select>
       @if (form.controls.assigneeId.touched && form.controls.assigneeId.invalid) {
-        <mat-error>Please choose an assignee.</mat-error>
+        <mat-error>{{ 'taskForm.assigneeRequired' | translate }}</mat-error>
       }
     </mat-form-field>
   </div>
 
   <fieldset class="task-form__tags">
-    <legend>Tags</legend>
+    <legend>{{ 'taskForm.tagsLegend' | translate }}</legend>
 
     @if (tagsControl.length > 0) {
       <ul class="task-form__tag-list">
@@ -88,7 +88,7 @@
             <button
               type="button"
               (click)="removeTag(i)"
-              [attr.aria-label]="'Remove tag ' + tag.value"
+              [attr.aria-label]="'taskForm.removeTag' | translate: { tag: tag.value }"
             >
               <mat-icon aria-hidden="true">close</mat-icon>
             </button>
@@ -99,7 +99,7 @@
 
     <div class="task-form__tag-input">
       <mat-form-field appearance="outline">
-        <mat-label>Add a tag</mat-label>
+        <mat-label>{{ 'taskForm.addTagLabel' | translate }}</mat-label>
         <input
           matInput
           [formControl]="newTagControl"
@@ -113,19 +113,21 @@
         [disabled]="tagsControl.length >= 5"
         (click)="onAddTag()"
       >
-        Add
+        {{ 'common.add' | translate }}
       </button>
     </div>
 
     @if (tagsControl.hasError('maxTags')) {
-      <p class="task-form__tag-error">You can add up to 5 tags.</p>
+      <p class="task-form__tag-error">{{ 'taskForm.maxTags' | translate }}</p>
     }
   </fieldset>
 
   <div class="task-form__actions">
-    <button type="button" mat-button (click)="cancelled.emit()">Cancel</button>
+    <button type="button" mat-button (click)="cancelled.emit()">
+      {{ 'common.cancel' | translate }}
+    </button>
     <button type="submit" mat-flat-button>
-      {{ isCreateMode() ? 'Create Task' : 'Save Changes' }}
+      {{ (isCreateMode() ? 'taskForm.createSubmit' : 'taskForm.saveSubmit') | translate }}
     </button>
   </div>
 </form>

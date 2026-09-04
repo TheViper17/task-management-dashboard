@@ -131,10 +131,18 @@
   }
 }
 
+// .header__language-option--active is NOT styled here — a mat-menu's items
+// render inside a CDK overlay attached to document.body, outside this
+// component's view encapsulation entirely (not just "scoped out", genuinely
+// not a descendant in the rendered DOM), so no selector written in this
+// file — scoped or ::ng-deep — could ever reach it. See
+// styles/_language-menu.scss (loaded globally via styles.scss), same
+// reasoning as _snackbar.scss.
+
 .header__badge {
   position: absolute;
   top: 2px;
-  right: 2px;
+  inset-inline-end: 2px;
   min-width: 16px;
   height: 16px;
   padding: 0 4px;

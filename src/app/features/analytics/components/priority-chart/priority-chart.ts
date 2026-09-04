@@ -1,9 +1,15 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import type { ChartConfiguration } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
+import { TranslationService } from '../../../../core/i18n/translation.service';
+import type { TranslationKey } from '../../../../core/i18n/translations/en';
 import type { TaskPriority } from '../../../../core/models/task.model';
 
-const LABELS: Record<TaskPriority, string> = { high: 'High', medium: 'Medium', low: 'Low' };
+const LABEL_KEYS: Record<TaskPriority, TranslationKey> = {
+  high: 'priority.high',
+  medium: 'priority.medium',
+  low: 'priority.low',
+};
 // Matches --app-priority-high/medium/low in _tokens.scss. Chart.js canvas
 // rendering can't read CSS custom properties, so these are the same hex
 // values duplicated intentionally — see the class doc comment.
@@ -27,14 +33,20 @@ const COLORS: Record<TaskPriority, string> = {
   styleUrl: './priority-chart.scss',
 })
 export class PriorityChart {
+  private readonly i18n = inject(TranslationService);
+
   readonly data = input.required<Record<TaskPriority, number>>();
 
   protected readonly priorities: readonly TaskPriority[] = ['high', 'medium', 'low'];
 
+  // Reads `this.i18n.translate(...)` (which reads the locale signal) inside
+  // this computed, not just `this.data()` — that's what makes it re-run,
+  // and Chart.js's canvas re-render along with it, when the language
+  // switches, not only when the underlying counts change.
   protected readonly chartData = computed<ChartConfiguration<'doughnut'>['data']>(() => {
     const data = this.data();
     return {
-      labels: this.priorities.map((p) => LABELS[p]),
+      labels: this.priorities.map((p) => this.i18n.translate(LABEL_KEYS[p])),
       datasets: [
         {
           data: this.priorities.map((p) => data[p]),
@@ -54,6 +66,13 @@ export class PriorityChart {
   };
 
   protected label(priority: TaskPriority): string {
-    return LABELS[priority];
+    return this.i18n.translate(LABEL_KEYS[priority]);
+  }
+
+  protected srItem(priority: TaskPriority): string {
+    return this.i18n.translate('analytics.chartSrItem', {
+      label: this.label(priority),
+      count: this.data()[priority],
+    });
   }
 }

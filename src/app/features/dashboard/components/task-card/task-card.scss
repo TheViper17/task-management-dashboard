@@ -6,7 +6,7 @@
   padding: var(--app-space-4);
   background: var(--app-surface);
   border: 1px solid var(--app-border);
-  border-left: 3px solid transparent;
+  border-inline-start: 3px solid transparent;
   border-radius: var(--app-radius-md);
   box-shadow: var(--app-elevation-card);
   transition:
@@ -31,7 +31,7 @@
 
   &--overdue {
     background: var(--app-overdue-surface);
-    border-left-color: var(--app-overdue-border);
+    border-inline-start-color: var(--app-overdue-border);
 
     &:hover {
       border-color: var(--app-overdue-border);

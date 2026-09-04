@@ -1,23 +1,32 @@
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, output } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
+import { TranslatePipe } from '../../core/i18n/translate.pipe';
+import type { Locale } from '../../core/i18n/translation.model';
+import { TranslationService } from '../../core/i18n/translation.service';
 import { Avatar } from '../../shared/ui/avatar/avatar';
 
 /**
- * Global top bar: brand, search, notifications, current-user avatar.
- * Purely presentational — emits the raw search value on every keystroke
- * and leaves debouncing to whoever owns the search state (`Shell`), so
- * this component stays a simple, fast-to-test function of its inputs.
+ * Global top bar: brand, search, notifications, language switcher,
+ * current-user avatar. Purely presentational except for the language
+ * switcher, which talks to `TranslationService` directly rather than
+ * round-tripping through `Shell` via an output — unlike search (whose
+ * debounce genuinely belongs to whoever owns the search state) there's no
+ * shared state here for a parent to own; `TranslationService` already is
+ * the single source of truth, app-wide.
  */
 @Component({
   selector: 'app-header',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, MatIconModule, Avatar],
+  imports: [ReactiveFormsModule, MatIconModule, MatMenuModule, TranslatePipe, Avatar],
   templateUrl: './header.html',
   styleUrl: './header.scss',
 })
 export class Header {
+  protected readonly i18n = inject(TranslationService);
+
   readonly currentUserInitials = input<string | null>(null);
   readonly notificationCount = input(0);
 
@@ -32,5 +41,9 @@ export class Header {
     this.searchControl.valueChanges
       .pipe(takeUntilDestroyed())
       .subscribe((value) => this.searchChange.emit(value));
+  }
+
+  protected setLocale(locale: Locale): void {
+    this.i18n.setLocale(locale);
   }
 }

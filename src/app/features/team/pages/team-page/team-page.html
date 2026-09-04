@@ -1,8 +1,8 @@
 <div class="team-page">
   @if (isInitialLoading()) {
-    <p class="team-page__status" role="status">Loading team…</p>
+    <p class="team-page__status" role="status">{{ 'team.loading' | translate }}</p>
   } @else if (userStore.users().length === 0) {
-    <p class="team-page__status">No team members yet.</p>
+    <p class="team-page__status">{{ 'team.empty' | translate }}</p>
   } @else {
     <div class="team-page__grid">
       @for (user of userStore.users(); track user.id) {

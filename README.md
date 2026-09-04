@@ -29,7 +29,7 @@ json-server mock backend, matching the provided Figma design.
 - [Testing strategy](#testing-strategy)
 - [Performance optimizations](#performance-optimizations)
 - [Accessibility](#accessibility)
-- [Docker](#docker)
+- [Internationalization](#internationalization)
 - [CI](#ci)
 - [Known limitations & future improvements](#known-limitations--future-improvements)
 
@@ -56,6 +56,10 @@ drag-and-drop between and within columns.
 **Dashboard** — 4 live stat cards, priority/status distribution charts
 (Chart.js), a recent-activity feed, a team directory with live per-user
 task counts.
+
+**Internationalization** (bonus item) — English and Arabic, switched
+instantly from the header, with full RTL layout mirroring and real
+grammatical plural support. See [Internationalization](#internationalization).
 
 **Everything the brief's "Must Do" list asks for**: standalone components
 throughout, Signals for state, smart/presentational split, `httpResource`
@@ -95,8 +99,7 @@ npm run dev
 This runs the Angular dev server (`:4200`) and the json-server mock API
 (`:3000`) together via `concurrently`. Angular's dev-server proxy
 (`proxy.conf.json`) forwards `/api/*` to `:3000`, so the app always calls
-a same-origin `/api/...` path — in dev via the proxy, in production via
-nginx (see [Docker](#docker)).
+a same-origin `/api/...` path regardless of what's serving it.
 
 Open **http://localhost:4200**.
 
@@ -137,7 +140,6 @@ path `/api/...` (see the `API_BASE_URL` injection token in
 | Context               | `/api` is handled by                                                  |
 | --------------------- | --------------------------------------------------------------------- |
 | `npm run dev`         | Angular CLI dev-server proxy (`proxy.conf.json`) → `localhost:3000`   |
-| `docker compose up`   | nginx (`nginx.conf`) → the `api` container, by service name           |
 | Any other static host | Reverse-proxy `/api` to wherever json-server (or a real backend) runs |
 
 The response-cache TTL (`CACHE_TTL_MS`, 30s) is likewise a plain provider
@@ -380,28 +382,70 @@ with a tool like axe or Lighthouse — see
 
 ---
 
-## Docker
+## Internationalization
 
-```bash
-docker compose up --build
-```
+English (primary) and Arabic (secondary, full RTL), switched instantly from
+the globe icon in the header — no page reload for the switch itself to
+register, though changing language does trigger one deliberately (see
+below). The choice persists to `localStorage` and is detected from the
+browser's language on first visit otherwise.
 
-- `web` → http://localhost:8080 (nginx serving the production Angular
-  build, proxying `/api/*` to the `api` container)
-- `api` → http://localhost:3000 (json-server, also reachable directly)
+**A small custom service, not `@angular/localize`.** Angular's official
+i18n pipeline compiles one separate app bundle per locale — great for a
+multi-region deployment behind locale-prefixed URLs, but it rules out an
+in-page language toggle without navigating to a different build entirely.
+This app ships one build and switches language at runtime instead, the
+same "match the actual requirement, don't reach for the heavy default"
+call already made for state management (signals, not NgRx) and toasts (a
+small `NotificationService`, not a toast library). The whole thing is
+`core/i18n/`: a `TranslationService` (a signal holding the current locale,
+a `translate(key, params)` method), an impure `TranslatePipe` for
+templates (impure deliberately — a pure pipe only re-runs when its own
+arguments change, never noticing the locale signal changing internally;
+writing to a signal is what schedules the next change-detection pass in
+this zoneless app, so an impure pipe and a signal-driven locale are a
+matched pair), and two typed dictionaries (`translations/en.ts`,
+`translations/ar.ts`) — Arabic is typed against English's exact key set,
+so adding a string in one without the other is a compile error, not a
+silently-missing translation discovered at runtime.
 
-One `Dockerfile`, two build targets (`api`, `web`) sharing a `deps` stage
-so `npm ci` only runs once. `docker-compose.yml` builds both from that
-one file.
+**Real plural support, not `count === 1`.** Arabic distinguishes six
+grammatical plural categories (zero/one/two/few/many/other) where English
+only has two. A `count` param resolves through `Intl.PluralRules` to pick
+the correct category, so "6 يوم" (wrong) never ships — "يستحق خلال 6
+أيام" does, using the grammatically correct **few** form for 3–10, with
+**many** and **other** forms for higher counts.
 
-> **Honest caveat**: Docker isn't installed in the environment this was
-> built in, so this was written carefully and had every file path it
-> references verified to exist, but **could not be run end-to-end**
-> (`docker compose up`) to prove it. If something doesn't come up
-> cleanly, the two most likely spots are the nginx `proxy_pass` rewrite
-> in `nginx.conf` and the `browser/` subpath in the `COPY --from=build`
-> line (Angular's application builder nests client output there even
-> with SSR disabled).
+**Full RTL, not just translated text in an LTR layout.** Switching to
+Arabic sets `dir="rtl"`, and the app's own layout — sidebar, spacing,
+card accents — is written in logical CSS properties
+(`border-inline-start`, `inset-inline-start`, …) rather than physical ones
+(`border-left`, `left`), so it mirrors automatically with no
+Arabic-specific overrides. Flexbox/Grid row layout (the board's three
+columns, the header's action row) mirrors on its own too — that's just
+how the inline axis works once `dir` is set, not something this app does
+manually.
+
+**Why switching language reloads the page.** Angular CDK's
+`Directionality` — what every overlay-based Material component
+(`mat-menu`, `mat-select`, `mat-datepicker`, `mat-sidenav`) reads to
+decide which side it opens or anchors from — resolves `document.dir`
+exactly once, at its own construction, with no built-in way to re-mirror
+components that already exist. Mutating `document.dir` after the app has
+booted would flip this app's own CSS (which reads it live) but leave
+every Material overlay pointing the wrong way. A reload is the standard
+fix production Angular apps use for exactly that — and it's cheap here,
+since `TranslationService` re-applies `lang`/`dir`/the document title
+before the root component (and so before `Directionality`) is ever
+constructed, via a `provideAppInitializer` in `app.config.ts`.
+
+**Server-sourced text is matched by a stable id, never translated as
+free text.** The dashboard's stat cards (`title`/`changeLabel`) come from
+the (mock) statistics API — a real backend's own copy, not this app's
+template. Rather than attempting to translate arbitrary server strings,
+each known stat is matched by its stable `id` to a translation key; an id
+outside that known set falls back to the server's own text untranslated,
+same as a real backend's text would have to.
 
 ---
 
@@ -430,14 +474,10 @@ doesn't block you from seeing whether tests also failed.
   writes through). `npm run db:reset` regenerates it from the assignment's
   original generator with dates relative to _today_ — run it before a
   demo if the data's gotten stale or messy.
-- **i18n**: not implemented (bonus item). Every user-facing string is a
-  literal in its template; there's no `$localize`/locale infrastructure.
 - **Lighthouse / formal WCAG audit**: not run (bonus items). The a11y
   work in this project (contrast computed and fixed, skip link, focus
   management, sr-only chart summaries) was done to genuinely hold up
   under an audit, but no audit tool was actually run against it.
-- **Docker**: written but not run end-to-end in this environment — see
-  the caveat [above](#docker).
 - **Calendar / Settings** are intentionally unbuilt placeholder routes —
   present in the Figma sidebar, not in the brief's functional
   requirements.

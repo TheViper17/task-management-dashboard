@@ -7,7 +7,7 @@
 .shell__skip-link {
   position: absolute;
   top: -100%;
-  left: var(--app-space-3);
+  inset-inline-start: var(--app-space-3);
   z-index: var(--app-z-overlay);
   padding: var(--app-space-2) var(--app-space-4);
   border-radius: var(--app-radius-md);
@@ -29,7 +29,7 @@
 
 .shell__sidenav {
   width: var(--app-sidebar-width);
-  border-right: 1px solid var(--app-border);
+  border-inline-end: 1px solid var(--app-border);
 }
 
 .shell__content {

@@ -12,6 +12,7 @@ export function toAppError(error: unknown): AppError {
       return {
         kind: 'network',
         message: 'Unable to reach the server. Check your connection and try again.',
+        messageKey: 'error.network',
         cause: error,
       };
     }
@@ -19,14 +20,19 @@ export function toAppError(error: unknown): AppError {
       return {
         kind: 'not-found',
         message: 'The requested item could not be found.',
+        messageKey: 'error.notFound',
         status: 404,
         cause: error,
       };
     }
     if (error.status === 400 || error.status === 422) {
+      const serverMessage = extractServerMessage(error);
       return {
         kind: 'validation',
-        message: extractServerMessage(error) ?? 'The request was invalid.',
+        message: serverMessage ?? 'The request was invalid.',
+        // Only a *static* fallback has a translation — a message the
+        // server actually sent has no key to translate it by.
+        ...(serverMessage ? {} : { messageKey: 'error.validation' }),
         status: error.status,
         cause: error,
       };
@@ -35,18 +41,26 @@ export function toAppError(error: unknown): AppError {
       return {
         kind: 'server',
         message: 'Something went wrong on the server. Please try again shortly.',
+        messageKey: 'error.server',
         status: error.status,
         cause: error,
       };
     }
+    const serverMessage = extractServerMessage(error);
     return {
       kind: 'unknown',
-      message: extractServerMessage(error) ?? 'An unexpected error occurred.',
+      message: serverMessage ?? 'An unexpected error occurred.',
+      ...(serverMessage ? {} : { messageKey: 'error.unknown' }),
       status: error.status,
       cause: error,
     };
   }
-  return { kind: 'unknown', message: 'An unexpected error occurred.', cause: error };
+  return {
+    kind: 'unknown',
+    message: 'An unexpected error occurred.',
+    messageKey: 'error.unknown',
+    cause: error,
+  };
 }
 
 /** Pulls a `message` field out of a JSON error body when the server sends one. */

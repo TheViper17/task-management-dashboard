@@ -3,6 +3,7 @@ import {
   Component,
   computed,
   effect,
+  inject,
   input,
   output,
   signal,
@@ -13,6 +14,8 @@ import { CdkDragHandle } from '@angular/cdk/drag-drop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
+import { TranslatePipe } from '../../../../core/i18n/translate.pipe';
+import { TranslationService } from '../../../../core/i18n/translation.service';
 import type { Task, TaskPatch } from '../../../../core/models/task.model';
 import { isTaskOverdue } from '../../../../core/utils/task.utils';
 import { isOptimisticId } from '../../../../core/utils/id.utils';
@@ -41,6 +44,7 @@ type EditableField = 'title' | 'description' | null;
     MatButtonModule,
     MatIconModule,
     MatMenuModule,
+    TranslatePipe,
     Avatar,
     DueDateChip,
     PriorityBadge,
@@ -49,6 +53,8 @@ type EditableField = 'title' | 'description' | null;
   styleUrl: './task-card.scss',
 })
 export class TaskCard {
+  private readonly i18n = inject(TranslationService);
+
   readonly task = input.required<Task>();
 
   readonly edit = output<void>();
@@ -106,7 +112,7 @@ export class TaskCard {
   protected readonly assigneeInitials = computed(() => this.task().assignee?.avatar ?? '?');
   protected readonly assigneeFirstName = computed(() => {
     const name = this.task().assignee?.name;
-    return name ? name.split(' ')[0] : 'Unassigned';
+    return name ? name.split(' ')[0] : this.i18n.translate('task.unassigned');
   });
 
   protected startEditing(field: 'title' | 'description'): void {
@@ -136,7 +142,7 @@ export class TaskCard {
     const value = this.draftValue().trim();
     const error = field === 'title' ? validateTitleText(value) : validateDescriptionText(value);
     if (error) {
-      this.draftError.set(error);
+      this.draftError.set(this.i18n.translate(error.key, error.params));
       return; // keep editing so the user can fix it, or press Escape to cancel
     }
 

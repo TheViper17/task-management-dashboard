@@ -2,11 +2,17 @@
   @if (taskStore.error()) {
     <div class="dashboard-page__error" role="alert">
       <mat-icon aria-hidden="true">error_outline</mat-icon>
-      <p>Couldn't load your tasks. Please check your connection and try again.</p>
-      <button type="button" mat-stroked-button (click)="taskStore.reload()">Retry</button>
+      <p>{{ 'dashboard.loadError' | translate }}</p>
+      <button type="button" mat-stroked-button (click)="taskStore.reload()">
+        {{ 'dashboard.retry' | translate }}
+      </button>
     </div>
   } @else if (isInitialLoading()) {
-    <div class="dashboard-page__skeleton" role="status" aria-label="Loading dashboard">
+    <div
+      class="dashboard-page__skeleton"
+      role="status"
+      [attr.aria-label]="'dashboard.loadingBoard' | translate"
+    >
       <div class="skeleton-stats">
         @for (i of [1, 2, 3, 4]; track i) {
           <div class="skeleton-stat-card">
@@ -55,7 +61,7 @@
 
     <div class="dashboard-page__board">
       <app-board-column
-        title="TO DO"
+        [title]="'status.todo' | translate"
         status="todo"
         [tasks]="taskStore.columns().todo"
         [connectedLists]="connectedLists"
@@ -65,7 +71,7 @@
         (taskMoved)="onTaskMoved($event)"
       />
       <app-board-column
-        title="IN PROGRESS"
+        [title]="'status.inProgress' | translate"
         status="in_progress"
         [tasks]="taskStore.columns().in_progress"
         [connectedLists]="connectedLists"
@@ -75,7 +81,7 @@
         (taskMoved)="onTaskMoved($event)"
       />
       <app-board-column
-        title="DONE"
+        [title]="'status.done' | translate"
         status="done"
         [tasks]="taskStore.columns().done"
         [connectedLists]="connectedLists"

@@ -2,7 +2,7 @@
   <button
     type="button"
     class="header__icon-button header__menu-button"
-    aria-label="Toggle navigation menu"
+    [attr.aria-label]="'header.menuToggle' | translate"
     (click)="menuClick.emit()"
   >
     <mat-icon aria-hidden="true">menu</mat-icon>
@@ -12,7 +12,7 @@
     <span class="header__logo">
       <mat-icon aria-hidden="true">dashboard</mat-icon>
     </span>
-    <span class="header__title">Task Manager</span>
+    <span class="header__title">{{ 'app.title' | translate }}</span>
   </div>
 
   <div class="header__search">
@@ -20,8 +20,8 @@
     <input
       type="search"
       [formControl]="searchControl"
-      placeholder="Search tasks..."
-      aria-label="Search tasks"
+      [placeholder]="'header.searchPlaceholder' | translate"
+      [attr.aria-label]="'header.searchLabel' | translate"
     />
   </div>
 
@@ -29,7 +29,41 @@
     <button
       type="button"
       class="header__icon-button"
-      aria-label="Notifications"
+      [matMenuTriggerFor]="languageMenu"
+      [attr.aria-label]="'header.language' | translate"
+    >
+      <mat-icon aria-hidden="true">language</mat-icon>
+    </button>
+    <mat-menu #languageMenu="matMenu">
+      <!--
+        Each language's own name is always written in its own script
+        ("English", "العربية") regardless of the current UI language — the
+        standard convention for a language picker, so a reader can find
+        their language even if they can't read whichever one is active
+        right now. Not translated content; see Header's own constants.
+      -->
+      <button
+        type="button"
+        mat-menu-item
+        [class.header__language-option--active]="i18n.locale() === 'en'"
+        (click)="setLocale('en')"
+      >
+        English
+      </button>
+      <button
+        type="button"
+        mat-menu-item
+        [class.header__language-option--active]="i18n.locale() === 'ar'"
+        (click)="setLocale('ar')"
+      >
+        العربية
+      </button>
+    </mat-menu>
+
+    <button
+      type="button"
+      class="header__icon-button"
+      [attr.aria-label]="'header.notifications' | translate"
       (click)="notificationsClick.emit()"
     >
       <mat-icon aria-hidden="true">notifications</mat-icon>

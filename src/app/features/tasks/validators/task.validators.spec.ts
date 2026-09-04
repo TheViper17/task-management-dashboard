@@ -11,15 +11,15 @@ import {
 
 describe('validateTitleText', () => {
   it('rejects an empty title', () => {
-    expect(validateTitleText('')).toBe('Title is required.');
+    expect(validateTitleText('')).toEqual({ key: 'taskForm.titleRequired' });
   });
 
   it('rejects a title under 3 characters', () => {
-    expect(validateTitleText('ab')).toBe('Title must be at least 3 characters.');
+    expect(validateTitleText('ab')).toEqual({ key: 'taskForm.titleMinLength' });
   });
 
   it('rejects a title over 120 characters', () => {
-    expect(validateTitleText('a'.repeat(121))).toBe("Title can't exceed 120 characters.");
+    expect(validateTitleText('a'.repeat(121))).toEqual({ key: 'taskForm.titleMaxLength' });
   });
 
   it('accepts a title within range', () => {
@@ -29,19 +29,19 @@ describe('validateTitleText', () => {
 
 describe('validateDescriptionText', () => {
   it('rejects an empty description', () => {
-    expect(validateDescriptionText('')).toBe('Description is required.');
+    expect(validateDescriptionText('')).toEqual({ key: 'taskForm.descriptionRequired' });
   });
 
   it('rejects a description under 10 characters', () => {
-    expect(validateDescriptionText('too short')).toBe(
-      'Description must be at least 10 characters.',
-    );
+    expect(validateDescriptionText('too short')).toEqual({
+      key: 'taskForm.descriptionMinLength',
+    });
   });
 
   it('rejects a description over 500 characters', () => {
-    expect(validateDescriptionText('a'.repeat(501))).toBe(
-      "Description can't exceed 500 characters.",
-    );
+    expect(validateDescriptionText('a'.repeat(501))).toEqual({
+      key: 'taskForm.descriptionMaxLength',
+    });
   });
 
   it('accepts a description within range', () => {

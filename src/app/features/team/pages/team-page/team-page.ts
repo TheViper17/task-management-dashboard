@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { TranslatePipe } from '../../../../core/i18n/translate.pipe';
 import { TaskStore } from '../../../../core/stores/task.store';
 import { UserStore } from '../../../../core/stores/user.store';
 import { UserCard } from '../../components/user-card/user-card';
@@ -7,7 +8,7 @@ import { UserCard } from '../../components/user-card/user-card';
 @Component({
   selector: 'app-team-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [UserCard],
+  imports: [UserCard, TranslatePipe],
   templateUrl: './team-page.html',
   styleUrl: './team-page.scss',
 })

@@ -1,0 +1,9 @@
+// Header's language-switcher mat-menu attaches to document.body via CDK
+// Overlay — outside any component's view encapsulation — so, like
+// _snackbar.scss and _drag-drop.scss, this can only be styled globally.
+@use 'tokens' as *;
+
+.header__language-option--active {
+  font-weight: 700;
+  color: var(--app-primary);
+}

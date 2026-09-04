@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
+import { TranslatePipe } from '../../../../core/i18n/translate.pipe';
 import { ActivityStore } from '../../../../core/stores/activity.store';
 import { TaskStore } from '../../../../core/stores/task.store';
 import { ActivityFeed } from '../../components/activity-feed/activity-feed';
@@ -18,7 +19,7 @@ import { StatusChart } from '../../components/status-chart/status-chart';
 @Component({
   selector: 'app-analytics-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [PriorityChart, StatusChart, ActivityFeed],
+  imports: [PriorityChart, StatusChart, ActivityFeed, TranslatePipe],
   providers: [provideCharts(withDefaultRegisterables())],
   templateUrl: './analytics-page.html',
   styleUrl: './analytics-page.scss',

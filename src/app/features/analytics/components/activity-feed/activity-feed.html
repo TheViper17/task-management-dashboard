@@ -4,7 +4,7 @@
       <mat-icon aria-hidden="true" class="activity-feed__icon">{{ icon(entry.type) }}</mat-icon>
       <div class="activity-feed__body">
         <p>
-          You {{ verb(entry.type) }} <strong>{{ entry.taskTitle }}</strong>
+          {{ verb(entry.type) }} <strong>{{ entry.taskTitle }}</strong>
           @if (entry.detail) {
             <span class="activity-feed__detail">({{ entry.detail }})</span>
           }
@@ -13,6 +13,6 @@
       </div>
     </li>
   } @empty {
-    <li class="activity-feed__empty">No recent activity.</li>
+    <li class="activity-feed__empty">{{ 'activity.empty' | translate }}</li>
   }
 </ul>

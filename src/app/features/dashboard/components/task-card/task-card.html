@@ -7,18 +7,18 @@
       class="task-card__menu-trigger"
       [matMenuTriggerFor]="menu"
       [disabled]="isPending()"
-      [attr.aria-label]="'More actions for ' + task().title"
+      [attr.aria-label]="'task.moreActions' | translate: { title: task().title }"
     >
       <mat-icon aria-hidden="true">more_vert</mat-icon>
     </button>
     <mat-menu #menu="matMenu">
       <button type="button" mat-menu-item (click)="edit.emit()">
         <mat-icon aria-hidden="true">edit</mat-icon>
-        Edit
+        {{ 'common.edit' | translate }}
       </button>
       <button type="button" mat-menu-item (click)="delete.emit()">
         <mat-icon aria-hidden="true">delete</mat-icon>
-        Delete
+        {{ 'common.delete' | translate }}
       </button>
     </mat-menu>
   </div>
@@ -39,7 +39,7 @@
         (keydown)="onTitleKeydown($event)"
         (blur)="commitEdit()"
         maxlength="120"
-        [attr.aria-label]="'Title for ' + task().title"
+        [attr.aria-label]="'task.titleFor' | translate: { title: task().title }"
         [attr.aria-invalid]="!!draftError()"
       />
     } @else {
@@ -62,7 +62,7 @@
         (blur)="commitEdit()"
         rows="3"
         maxlength="500"
-        [attr.aria-label]="'Description for ' + task().title"
+        [attr.aria-label]="'task.descriptionFor' | translate: { title: task().title }"
         [attr.aria-invalid]="!!draftError()"
       ></textarea>
     } @else {

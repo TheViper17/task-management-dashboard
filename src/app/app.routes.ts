@@ -3,8 +3,10 @@ import type { Routes } from '@angular/router';
 /**
  * `withComponentInputBinding()` (enabled in app.config.ts) maps a route's
  * `data` object directly onto matching component `input()`s — that's how
- * `PlaceholderPage`'s `title`/`subtitle` are set below with no wrapper
- * component per route.
+ * `PlaceholderPage`'s `titleKey`/`subtitleKey` are set below with no
+ * wrapper component per route. `data` is plain, static route config — it
+ * can't call `TranslationService` itself, so these are translation *keys*,
+ * resolved by `PlaceholderPage`'s own template.
  */
 export const routes: Routes = [
   {
@@ -24,14 +26,14 @@ export const routes: Routes = [
         path: 'tasks',
         loadComponent: () =>
           import('./shared/ui/placeholder-page/placeholder-page').then((m) => m.PlaceholderPage),
-        data: { title: 'Tasks', icon: 'task_alt' },
+        data: { titleKey: 'nav.tasks', icon: 'task_alt' },
       },
       {
         // Out of scope per the brief — kept so the sidebar link doesn't 404.
         path: 'calendar',
         loadComponent: () =>
           import('./shared/ui/placeholder-page/placeholder-page').then((m) => m.PlaceholderPage),
-        data: { title: 'Calendar', icon: 'calendar_today' },
+        data: { titleKey: 'nav.calendar', icon: 'calendar_today' },
       },
       {
         path: 'analytics',
@@ -50,7 +52,7 @@ export const routes: Routes = [
         path: 'settings',
         loadComponent: () =>
           import('./shared/ui/placeholder-page/placeholder-page').then((m) => m.PlaceholderPage),
-        data: { title: 'Settings', icon: 'settings' },
+        data: { titleKey: 'nav.settings', icon: 'settings' },
       },
     ],
   },
@@ -58,6 +60,6 @@ export const routes: Routes = [
     path: '**',
     loadComponent: () =>
       import('./shared/ui/placeholder-page/placeholder-page').then((m) => m.PlaceholderPage),
-    data: { title: 'Page not found', icon: 'error_outline', subtitle: '' },
+    data: { titleKey: 'placeholder.notFoundTitle', icon: 'error_outline', subtitleKey: null },
   },
 ];

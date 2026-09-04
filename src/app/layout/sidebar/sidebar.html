@@ -1,4 +1,4 @@
-<nav class="sidebar" aria-label="Main">
+<nav class="sidebar" [attr.aria-label]="'nav.main' | translate">
   <ul class="sidebar__nav">
     @for (item of navItems; track item.path) {
       <li>
@@ -11,7 +11,7 @@
           (click)="linkClick.emit()"
         >
           <mat-icon aria-hidden="true">{{ item.icon }}</mat-icon>
-          <span>{{ item.label }}</span>
+          <span>{{ item.labelKey | translate }}</span>
         </a>
       </li>
     }
@@ -19,6 +19,6 @@
 
   <button type="button" class="sidebar__new-task" (click)="newTaskClick.emit()">
     <mat-icon aria-hidden="true">add</mat-icon>
-    New Task
+    {{ 'common.newTask' | translate }}
   </button>
 </nav>

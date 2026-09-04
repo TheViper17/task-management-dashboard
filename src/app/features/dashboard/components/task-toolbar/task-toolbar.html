@@ -3,12 +3,12 @@
     class="task-toolbar__status"
     [value]="activeStatus()"
     (change)="onStatusChange($event)"
-    aria-label="Filter by status"
+    [attr.aria-label]="'toolbar.statusFilterLabel' | translate"
   >
-    <mat-button-toggle value="all">All</mat-button-toggle>
-    <mat-button-toggle value="todo">To Do</mat-button-toggle>
-    <mat-button-toggle value="in_progress">In Progress</mat-button-toggle>
-    <mat-button-toggle value="done">Done</mat-button-toggle>
+    <mat-button-toggle value="all">{{ 'toolbar.statusAll' | translate }}</mat-button-toggle>
+    <mat-button-toggle value="todo">{{ 'status.todo' | translate }}</mat-button-toggle>
+    <mat-button-toggle value="in_progress">{{ 'status.inProgress' | translate }}</mat-button-toggle>
+    <mat-button-toggle value="done">{{ 'status.done' | translate }}</mat-button-toggle>
   </mat-button-toggle-group>
 
   <div class="task-toolbar__actions">
@@ -18,11 +18,17 @@
     </button>
     <mat-menu #priorityMenu="matMenu">
       <button type="button" mat-menu-item (click)="priorityChange.emit('all')">
-        All Priorities
+        {{ 'priority.all' | translate }}
       </button>
-      <button type="button" mat-menu-item (click)="priorityChange.emit('high')">High</button>
-      <button type="button" mat-menu-item (click)="priorityChange.emit('medium')">Medium</button>
-      <button type="button" mat-menu-item (click)="priorityChange.emit('low')">Low</button>
+      <button type="button" mat-menu-item (click)="priorityChange.emit('high')">
+        {{ 'priority.high' | translate }}
+      </button>
+      <button type="button" mat-menu-item (click)="priorityChange.emit('medium')">
+        {{ 'priority.medium' | translate }}
+      </button>
+      <button type="button" mat-menu-item (click)="priorityChange.emit('low')">
+        {{ 'priority.low' | translate }}
+      </button>
     </mat-menu>
 
     <button type="button" mat-stroked-button [matMenuTriggerFor]="assigneeMenu">
@@ -31,7 +37,7 @@
     </button>
     <mat-menu #assigneeMenu="matMenu">
       <button type="button" mat-menu-item (click)="assigneeChange.emit('all')">
-        All Assignees
+        {{ 'toolbar.assigneeAll' | translate }}
       </button>
       @for (assignee of assignees(); track assignee.id) {
         <button type="button" mat-menu-item (click)="assigneeChange.emit(assignee.id)">
@@ -47,7 +53,7 @@
       (click)="newTaskClick.emit()"
     >
       <mat-icon aria-hidden="true">add</mat-icon>
-      New Task
+      {{ 'common.newTask' | translate }}
     </button>
   </div>
 </div>

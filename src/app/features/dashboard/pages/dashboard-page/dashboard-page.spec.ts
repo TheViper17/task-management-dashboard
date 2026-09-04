@@ -91,16 +91,19 @@ describe('DashboardPage', () => {
 
   it('renders all three board columns', async () => {
     await setup();
-    expect(screen.getByText('TO DO')).toBeInTheDocument();
-    expect(screen.getByText('IN PROGRESS')).toBeInTheDocument();
-    expect(screen.getByText('DONE')).toBeInTheDocument();
+    // Column headings, not the status-filter toggle above them — both now
+    // render the same "To Do"/"In Progress"/"Done" text since the toggle
+    // and the column titles share the same translation keys.
+    expect(screen.getByRole('heading', { name: 'To Do' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'In Progress' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Done' })).toBeInTheDocument();
   });
 
   it('calls TaskStore.setFilters when a status tab is clicked', async () => {
     const user = userEvent.setup();
     await setup();
 
-    await user.click(screen.getByText('Done'));
+    await user.click(screen.getByRole('radio', { name: 'Done' }));
 
     expect(taskStoreStub.setFilters).toHaveBeenCalledWith({ status: 'done' });
   });
@@ -174,14 +177,14 @@ describe('DashboardPage', () => {
       await setup({ isLoading: true });
 
       expect(screen.getByRole('status', { name: /loading dashboard/i })).toBeInTheDocument();
-      expect(screen.queryByText('TO DO')).not.toBeInTheDocument();
+      expect(screen.queryByText('To Do')).not.toBeInTheDocument();
     });
 
     it('does not show the skeleton on a later reload once tasks are already loaded', async () => {
       await setup({ todoTasks: [makeTask()], isLoading: true });
 
       expect(screen.queryByRole('status', { name: /loading dashboard/i })).not.toBeInTheDocument();
-      expect(screen.getByText('TO DO')).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'To Do' })).toBeInTheDocument();
     });
 
     it('shows an error state with a Retry button when the load fails', async () => {
@@ -189,7 +192,7 @@ describe('DashboardPage', () => {
       await setup({ error: new Error('network down') });
 
       expect(screen.getByRole('alert')).toHaveTextContent(/couldn't load your tasks/i);
-      expect(screen.queryByText('TO DO')).not.toBeInTheDocument();
+      expect(screen.queryByText('To Do')).not.toBeInTheDocument();
 
       await user.click(screen.getByRole('button', { name: /retry/i }));
       expect(taskStoreStub.reload).toHaveBeenCalled();

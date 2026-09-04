@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/angular';
 import userEvent from '@testing-library/user-event';
 import { Header } from './header';
+import { TranslationService } from '../../core/i18n/translation.service';
 
 describe('Header', () => {
   it('renders the brand title', async () => {
@@ -44,5 +45,35 @@ describe('Header', () => {
 
     await rerender({ inputs: { currentUserInitials: 'JD' } });
     expect(screen.getByText('JD')).toBeInTheDocument();
+  });
+
+  describe('language switcher', () => {
+    it('opens a menu listing both languages by their own native name', async () => {
+      const user = userEvent.setup();
+      await render(Header);
+
+      await user.click(screen.getByRole('button', { name: 'Language' }));
+
+      expect(await screen.findByRole('menuitem', { name: 'English' })).toBeInTheDocument();
+      expect(screen.getByRole('menuitem', { name: 'العربية' })).toBeInTheDocument();
+    });
+
+    it('switches to Arabic via TranslationService when العربية is chosen', async () => {
+      // TranslationService.setLocale() reloads the page (see its own doc
+      // comment) — mocked out here so the test verifies the *call*, not a
+      // real navigation, matching how translation.service.spec.ts already
+      // covers the reload behaviour itself in isolation.
+      const setLocaleSpy = vi
+        .spyOn(TranslationService.prototype, 'setLocale')
+        .mockImplementation(() => undefined);
+      const user = userEvent.setup();
+      await render(Header);
+
+      await user.click(screen.getByRole('button', { name: 'Language' }));
+      await user.click(await screen.findByRole('menuitem', { name: 'العربية' }));
+
+      expect(setLocaleSpy).toHaveBeenCalledWith('ar');
+      setLocaleSpy.mockRestore();
+    });
   });
 });

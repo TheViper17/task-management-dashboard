@@ -1,4 +1,6 @@
 import type { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
+import type { TranslateParams } from '../../../core/i18n/translation.model';
+import type { TranslationKey } from '../../../core/i18n/translations/en';
 import type { Assignee } from '../../../core/models/task.model';
 
 // Single source of truth for title/description length constraints — used by
@@ -12,24 +14,31 @@ export const TITLE_MAX_LENGTH = 120;
 export const DESCRIPTION_MIN_LENGTH = 10;
 export const DESCRIPTION_MAX_LENGTH = 500;
 
+/**
+ * A validation failure as a translation key + params rather than a formatted
+ * string — these two functions are plain, framework-agnostic code (no
+ * `inject()`, independently unit-tested), so they can't call
+ * `TranslationService` themselves. The caller (`TaskCard`) resolves the
+ * actual wording via `i18n.translate(error.key, error.params)`.
+ */
+export interface TextValidationError {
+  key: TranslationKey;
+  params?: TranslateParams;
+}
+
 /** Validates a task title typed outside reactive forms; `null` means valid. */
-export function validateTitleText(value: string): string | null {
-  if (!value) return 'Title is required.';
-  if (value.length < TITLE_MIN_LENGTH)
-    return `Title must be at least ${TITLE_MIN_LENGTH} characters.`;
-  if (value.length > TITLE_MAX_LENGTH) return `Title can't exceed ${TITLE_MAX_LENGTH} characters.`;
+export function validateTitleText(value: string): TextValidationError | null {
+  if (!value) return { key: 'taskForm.titleRequired' };
+  if (value.length < TITLE_MIN_LENGTH) return { key: 'taskForm.titleMinLength' };
+  if (value.length > TITLE_MAX_LENGTH) return { key: 'taskForm.titleMaxLength' };
   return null;
 }
 
 /** Validates a task description typed outside reactive forms; `null` means valid. */
-export function validateDescriptionText(value: string): string | null {
-  if (!value) return 'Description is required.';
-  if (value.length < DESCRIPTION_MIN_LENGTH) {
-    return `Description must be at least ${DESCRIPTION_MIN_LENGTH} characters.`;
-  }
-  if (value.length > DESCRIPTION_MAX_LENGTH) {
-    return `Description can't exceed ${DESCRIPTION_MAX_LENGTH} characters.`;
-  }
+export function validateDescriptionText(value: string): TextValidationError | null {
+  if (!value) return { key: 'taskForm.descriptionRequired' };
+  if (value.length < DESCRIPTION_MIN_LENGTH) return { key: 'taskForm.descriptionMinLength' };
+  if (value.length > DESCRIPTION_MAX_LENGTH) return { key: 'taskForm.descriptionMaxLength' };
   return null;
 }
 

@@ -49,6 +49,24 @@
   justify-content: space-between;
 }
 
+.task-card__handle {
+  display: flex;
+  flex-direction: column;
+  gap: inherit;
+  cursor: grab;
+
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+// CDK adds this class to the app-task-card host when [cdkDragDisabled] is
+// true (an optimistic, not-yet-confirmed task) — only reachable from here,
+// not from board-column.scss, since it's past that stylesheet's scope.
+:host(.cdk-drag-disabled) .task-card__handle {
+  cursor: not-allowed;
+}
+
 .task-card__menu-trigger {
   margin: -8px -8px 0 0;
   color: var(--app-text-muted);

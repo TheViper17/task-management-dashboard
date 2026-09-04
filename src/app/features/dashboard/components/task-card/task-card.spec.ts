@@ -86,4 +86,37 @@ describe('TaskCard', () => {
     await render(TaskCard, { inputs: { task: makeTask({ id: 'optimistic-abc123' }) } });
     expect(screen.getByRole('button', { name: /more actions/i })).toBeDisabled();
   });
+
+  it('falls back to "Unassigned" and a "?" avatar instead of crashing when assignee is missing', async () => {
+    // Reproduces the real-world shape the mock backend used to echo back
+    // before TaskStore started overlaying the resolved assignee — this is
+    // the exact template access that used to throw
+    // "Cannot read properties of undefined (reading 'avatar')" and take
+    // down the whole render pass. Cast is deliberate: Task#assignee is
+    // typed as required, but must never be trusted as actually present.
+    const task = { ...makeTask(), assignee: undefined } as unknown as Task;
+    await render(TaskCard, { inputs: { task } });
+
+    expect(screen.getByText('@Unassigned')).toBeInTheDocument();
+    expect(screen.getByText('?')).toBeInTheDocument();
+  });
+
+  it("opens and stays open when the actions menu is clicked (not swallowed by the card's drag handle)", async () => {
+    // Regression test for the menu-open-then-instant-close glitch: cdkDrag's
+    // own pointer tracking on the whole card host was racing the menu
+    // overlay's open. Scoping the drag handle away from the actions row
+    // (see task-card.html) fixed it — this asserts the menu is still open
+    // well after the ~300ms window the original bug closed it within.
+    const user = userEvent.setup();
+    await render(TaskCard, { inputs: { task: makeTask() } });
+
+    await user.click(screen.getByRole('button', { name: /more actions/i }));
+    const menuItem = await screen.findByRole('menuitem', { name: /edit/i });
+    expect(menuItem).toBeInTheDocument();
+
+    // Real timers here (only Date is faked in this suite — see beforeEach),
+    // so this is an actual elapsed wait, not a simulated tick.
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    expect(screen.getByRole('menuitem', { name: /edit/i })).toBeInTheDocument();
+  });
 });

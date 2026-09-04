@@ -109,10 +109,15 @@ export class TaskStore {
     this.resource.update((tasks) => [optimistic, ...tasks]);
 
     try {
-      const created = await firstValueFrom(this.api.create(dto));
-      this.resource.update((tasks) => tasks.map((t) => (t.id === optimistic.id ? created : t)));
-      this.activity.record('created', created);
-      return created;
+      const created = await firstValueFrom(this.api.create(dto, assignee));
+      // Overlay the resolved assignee regardless of what the server echoed
+      // back — belt-and-braces alongside the API service sending it on the
+      // wire, since a template that reads `task.assignee.name` must never
+      // see this field missing.
+      const reconciled: Task = { ...created, assignee };
+      this.resource.update((tasks) => tasks.map((t) => (t.id === optimistic.id ? reconciled : t)));
+      this.activity.record('created', reconciled);
+      return reconciled;
     } catch (err) {
       this.resource.update((tasks) => tasks.filter((t) => t.id !== optimistic.id));
       throw err;
@@ -124,11 +129,16 @@ export class TaskStore {
     const previous = this.tasks();
     this.resource.update((tasks) => tasks.map((t) => (t.id === id ? applyTaskPatch(t, patch) : t)));
 
+    // Only resolved when the patch actually reassigns the task — see
+    // TaskApiService.update's doc comment for why this needs sending at all.
+    const assignee = patch.assigneeId ? this.userStore.findById(patch.assigneeId) : undefined;
+
     try {
-      const updated = await firstValueFrom(this.api.update(id, patch));
-      this.resource.update((tasks) => tasks.map((t) => (t.id === id ? updated : t)));
-      this.activity.record('updated', updated);
-      return updated;
+      const updated = await firstValueFrom(this.api.update(id, patch, assignee));
+      const reconciled = assignee ? { ...updated, assignee } : updated;
+      this.resource.update((tasks) => tasks.map((t) => (t.id === id ? reconciled : t)));
+      this.activity.record('updated', reconciled);
+      return reconciled;
     } catch (err) {
       this.resource.set(previous);
       throw err;

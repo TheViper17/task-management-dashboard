@@ -23,21 +23,34 @@
     </mat-menu>
   </div>
 
-  <h3 class="task-card__title">{{ task().title }}</h3>
-  <p class="task-card__description">{{ task().description }}</p>
+  <!--
+    Everything below is the drag handle, not the whole card — the top row
+    (menu trigger) is deliberately excluded. cdkDrag listens for pointerdown
+    on its entire host by default; with the menu button inside that host,
+    every click on it raced with CDK's own drag-activation tracking, which
+    was corrupting the menu overlay's position calculation and closing it
+    within the same event (reproduced live: it opened and closed within
+    300ms of a plain click, no drag involved). Scoping the handle to
+    everything except the actions row leaves the button — and its menu —
+    as normal, unblocked interactive elements again.
+  -->
+  <div class="task-card__handle" cdkDragHandle>
+    <h3 class="task-card__title">{{ task().title }}</h3>
+    <p class="task-card__description">{{ task().description }}</p>
 
-  <app-due-date-chip
-    [dueDate]="task().dueDate"
-    [status]="task().status"
-    [completedAt]="task().completedAt"
-  />
+    <app-due-date-chip
+      [dueDate]="task().dueDate"
+      [status]="task().status"
+      [completedAt]="task().completedAt"
+    />
 
-  @if (tag(); as tag) {
-    <p class="task-card__tag">{{ tag }}</p>
-  }
+    @if (tag(); as tag) {
+      <p class="task-card__tag">{{ tag }}</p>
+    }
 
-  <div class="task-card__footer">
-    <app-avatar [initials]="task().assignee.avatar" [size]="24" />
-    <span>&#64;{{ task().assignee.name.split(' ')[0] }}</span>
+    <div class="task-card__footer">
+      <app-avatar [initials]="assigneeInitials()" [size]="24" />
+      <span>&#64;{{ assigneeFirstName() }}</span>
+    </div>
   </div>
 </article>

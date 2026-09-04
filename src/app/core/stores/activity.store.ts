@@ -31,8 +31,13 @@ export class ActivityStore {
   seedIfEmpty(tasks: readonly Task[]): void {
     if (this._entries().length > 0 || tasks.length === 0) return;
 
+    // Defensive, not just because TaskApiService now always stamps
+    // createdAt/updatedAt on write (found live: a task persisted before that
+    // fix — or written by anything else that skips it — has neither field,
+    // and `undefined.localeCompare()` used to crash this sort outright,
+    // taking the activity feed and this effect down with it).
     const seeded = [...tasks]
-      .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+      .sort((a, b) => (b.updatedAt ?? '').localeCompare(a.updatedAt ?? ''))
       .slice(0, SEED_COUNT)
       .map(toSeedEntry);
 

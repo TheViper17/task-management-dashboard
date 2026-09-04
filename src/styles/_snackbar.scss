@@ -1,0 +1,33 @@
+// Snackbar overlays attach to document.body while open — outside any
+// component's view encapsulation — so, like _drag-drop.scss, this can only
+// be styled globally.
+//
+// Colours reuse the same verified-AA palette as everything else (priority
+// badges, deltas) rather than introducing new ones: white text on each
+// clears 4.5:1 (checked, not assumed — see the phase notes for the exact
+// ratios: 5.31 / 5.13 / 5.06).
+@use 'tokens' as *;
+
+.app-snackbar-success {
+  --mat-snack-bar-container-color: var(--app-priority-low);
+  --mat-snack-bar-supporting-text-color: var(--app-primary-contrast);
+  --mat-snack-bar-button-color: var(--app-primary-contrast);
+}
+
+.app-snackbar-error {
+  --mat-snack-bar-container-color: var(--app-priority-high);
+  --mat-snack-bar-supporting-text-color: var(--app-primary-contrast);
+  --mat-snack-bar-button-color: var(--app-primary-contrast);
+}
+
+.app-snackbar-warning {
+  --mat-snack-bar-container-color: var(--app-priority-medium);
+  --mat-snack-bar-supporting-text-color: var(--app-primary-contrast);
+  --mat-snack-bar-button-color: var(--app-primary-contrast);
+}
+
+.app-snackbar-info {
+  --mat-snack-bar-container-color: var(--app-primary);
+  --mat-snack-bar-supporting-text-color: var(--app-primary-contrast);
+  --mat-snack-bar-button-color: var(--app-primary-contrast);
+}

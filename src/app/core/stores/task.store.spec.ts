@@ -150,16 +150,29 @@ describe('TaskStore', () => {
 
     it('inserts an optimistic task immediately, then reconciles with the server response', async () => {
       await seed([]);
-      const created = makeTask({ id: 'task-99', ...dto });
-      apiSpy.create.mockReturnValue(of(created));
+      // Mirrors what the real mock backend echoes back from a bare POST: no
+      // embedded `assignee`, since json-server has no relational join and
+      // only ever persists what CreateTaskDto sent (assigneeId, no assignee).
+      // Cast is deliberate — this is reproducing a real-world shape mismatch
+      // against the (assignee-required) Task type, not a typo.
+      const rawResponse = {
+        ...makeTask({ id: 'task-99', ...dto }),
+        assignee: undefined,
+      } as unknown as Task;
+      apiSpy.create.mockReturnValue(of(rawResponse));
 
       const promise = store.create(dto);
       expect(store.tasks()[0].id).toMatch(/^optimistic-/);
 
       const result = await promise;
-      expect(result).toEqual(created);
-      expect(store.tasks()).toEqual([created]);
-      expect(activitySpy.record).toHaveBeenCalledWith('created', created);
+      expect(apiSpy.create).toHaveBeenCalledWith(dto, ASSIGNEE);
+      // The store must overlay the resolved assignee itself — it can never
+      // trust the server response to carry one back. This is the exact bug
+      // that crashed TaskCard's template on a real assignee-less response.
+      const expected = { ...rawResponse, assignee: ASSIGNEE };
+      expect(result).toEqual(expected);
+      expect(store.tasks()).toEqual([expected]);
+      expect(activitySpy.record).toHaveBeenCalledWith('created', expected);
     });
 
     it('removes the optimistic task and rethrows if the request fails', async () => {
@@ -167,6 +180,7 @@ describe('TaskStore', () => {
       apiSpy.create.mockReturnValue(throwError(() => new Error('network down')));
 
       await expect(store.create(dto)).rejects.toThrow('network down');
+      expect(apiSpy.create).toHaveBeenCalledWith(dto, ASSIGNEE);
       expect(store.tasks()).toEqual([]);
       expect(activitySpy.record).not.toHaveBeenCalled();
     });
@@ -181,6 +195,7 @@ describe('TaskStore', () => {
       expect(store.tasks()).toEqual([]); // nothing optimistic yet
 
       await promise;
+      expect(apiSpy.create).toHaveBeenCalledWith(dto); // no assignee to embed
       expect(store.tasks()).toEqual([created]);
     });
   });
@@ -195,8 +210,35 @@ describe('TaskStore', () => {
       expect(store.tasks()[0].title).toBe('New title'); // optimistic, before await
 
       await promise;
+      // No assigneeId in the patch, so nothing to resolve or overlay.
+      expect(apiSpy.update).toHaveBeenCalledWith('1', { title: 'New title' }, undefined);
       expect(store.tasks()).toEqual([updated]);
       expect(activitySpy.record).toHaveBeenCalledWith('updated', updated);
+    });
+
+    it('reassigning a task resolves and overlays the new assignee, even if the server echoes back without it', async () => {
+      await seed([makeTask({ id: '1' })]);
+      const newAssignee: Assignee = {
+        id: 'user-2',
+        name: 'Grace Hopper',
+        avatar: 'GH',
+        email: 'grace@company.com',
+      };
+      userStoreStub.findById.mockReturnValue(newAssignee);
+      // Same real-world shape mismatch as create(): the mock backend's raw
+      // response carries assigneeId but no embedded assignee.
+      const rawResponse = {
+        ...makeTask({ id: '1', assigneeId: newAssignee.id }),
+        assignee: undefined,
+      } as unknown as Task;
+      apiSpy.update.mockReturnValue(of(rawResponse));
+
+      const result = await store.update('1', { assigneeId: newAssignee.id });
+
+      expect(userStoreStub.findById).toHaveBeenCalledWith(newAssignee.id);
+      expect(apiSpy.update).toHaveBeenCalledWith('1', { assigneeId: newAssignee.id }, newAssignee);
+      expect(result.assignee).toEqual(newAssignee);
+      expect(store.tasks()[0].assignee).toEqual(newAssignee);
     });
 
     it('rolls back to the previous state and rethrows if the request fails', async () => {

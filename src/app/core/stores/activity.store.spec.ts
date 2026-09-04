@@ -82,6 +82,24 @@ describe('ActivityStore', () => {
       store.seedIfEmpty([]);
       expect(store.entries()).toEqual([]);
     });
+
+    it('does not crash when a task is missing updatedAt', () => {
+      // Regression test: found live by creating a task and reloading, back
+      // when TaskApiService didn't stamp createdAt/updatedAt on write —
+      // json-server just persisted whatever was POSTed, so an already-stored
+      // task without updatedAt made `undefined.localeCompare()` throw and
+      // take this whole seed pass down with it. Task#updatedAt is typed as
+      // required; the cast reproduces the real-world shape mismatch anyway.
+      const withTimestamp = makeTask({ id: 'has-timestamp' });
+      const withoutTimestamp = {
+        ...makeTask({ id: 'missing-timestamp' }),
+        updatedAt: undefined,
+      } as unknown as Task;
+      const store = new ActivityStore();
+
+      expect(() => store.seedIfEmpty([withoutTimestamp, withTimestamp])).not.toThrow();
+      expect(store.entries().map((e) => e.taskId)).toEqual(['has-timestamp', 'missing-timestamp']);
+    });
   });
 
   describe('record', () => {

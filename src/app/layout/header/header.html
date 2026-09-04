@@ -1,0 +1,36 @@
+<header class="header">
+  <div class="header__brand">
+    <span class="header__logo">
+      <mat-icon aria-hidden="true">dashboard</mat-icon>
+    </span>
+    <span class="header__title">Task Manager</span>
+  </div>
+
+  <div class="header__search">
+    <mat-icon aria-hidden="true">search</mat-icon>
+    <input
+      type="search"
+      [formControl]="searchControl"
+      placeholder="Search tasks..."
+      aria-label="Search tasks"
+    />
+  </div>
+
+  <div class="header__actions">
+    <button
+      type="button"
+      class="header__icon-button"
+      aria-label="Notifications"
+      (click)="notificationsClick.emit()"
+    >
+      <mat-icon aria-hidden="true">notifications</mat-icon>
+      @if (notificationCount() > 0) {
+        <span class="header__badge">{{ notificationCount() }}</span>
+      }
+    </button>
+
+    @if (currentUserInitials(); as initials) {
+      <app-avatar [initials]="initials" [size]="36" />
+    }
+  </div>
+</header>

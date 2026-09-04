@@ -1,0 +1,27 @@
+.placeholder-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--app-space-3);
+  min-height: 60vh;
+  color: var(--app-text-muted);
+  text-align: center;
+
+  mat-icon {
+    font-size: 40px;
+    width: 40px;
+    height: 40px;
+    color: var(--app-border-strong);
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: var(--app-text);
+  }
+
+  p {
+    margin: 0;
+  }
+}

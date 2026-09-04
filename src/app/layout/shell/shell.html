@@ -1,0 +1,12 @@
+<div class="shell">
+  <app-header
+    [currentUserInitials]="currentUser()?.avatar ?? null"
+    (searchChange)="onSearchChange($event)"
+  />
+  <div class="shell__body">
+    <app-sidebar />
+    <main class="shell__content">
+      <router-outlet />
+    </main>
+  </div>
+</div>

@@ -1,23 +1,28 @@
-import { TestBed } from '@angular/core/testing';
+import { provideRouter, withComponentInputBinding } from '@angular/router';
+import { render, screen } from '@testing-library/angular';
 import { App } from './app';
 
 describe('App', () => {
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [App],
-    }).compileComponents();
-  });
+  it('renders the routed page at the root path', async () => {
+    await render(App, {
+      providers: [
+        provideRouter(
+          [
+            {
+              path: '',
+              pathMatch: 'full',
+              loadComponent: () =>
+                import('./shared/ui/placeholder-page/placeholder-page').then(
+                  (m) => m.PlaceholderPage,
+                ),
+              data: { title: 'Home' },
+            },
+          ],
+          withComponentInputBinding(),
+        ),
+      ],
+    });
 
-  it('should create the app', () => {
-    const fixture = TestBed.createComponent(App);
-    const app = fixture.componentInstance;
-    expect(app).toBeTruthy();
-  });
-
-  it('should render title', async () => {
-    const fixture = TestBed.createComponent(App);
-    await fixture.whenStable();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, task-management-dashboard');
+    expect(await screen.findByRole('heading', { name: 'Home' })).toBeInTheDocument();
   });
 });

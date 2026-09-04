@@ -4,7 +4,7 @@
     (searchChange)="onSearchChange($event)"
   />
   <div class="shell__body">
-    <app-sidebar />
+    <app-sidebar (newTaskClick)="onNewTask()" />
     <main class="shell__content">
       <router-outlet />
     </main>

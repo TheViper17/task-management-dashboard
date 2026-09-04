@@ -2,11 +2,11 @@ import { MatDialog } from '@angular/material/dialog';
 import { render, screen } from '@testing-library/angular';
 import userEvent from '@testing-library/user-event';
 import { of } from 'rxjs';
-import { NotificationService } from '../../../../core/services/notification.service';
 import type { Task, TaskFilters } from '../../../../core/models/task.model';
 import { DEFAULT_TASK_FILTERS } from '../../../../core/models/task.model';
 import { StatisticsStore } from '../../../../core/stores/statistics.store';
 import { TaskStore } from '../../../../core/stores/task.store';
+import { TaskDialogService } from '../../../tasks/task-dialog.service';
 import { DashboardPage } from './dashboard-page';
 
 function makeTask(overrides: Partial<Task> = {}): Task {
@@ -38,7 +38,7 @@ describe('DashboardPage', () => {
   };
   let statisticsStoreStub: { statistics: () => unknown[] };
   let dialogOpenSpy: ReturnType<typeof vi.fn>;
-  let notifySpy: { showInfo: ReturnType<typeof vi.fn> };
+  let taskDialogStub: { createTask: ReturnType<typeof vi.fn>; editTask: ReturnType<typeof vi.fn> };
 
   function setup(todoTasks: Task[] = []): ReturnType<typeof render> {
     taskStoreStub = {
@@ -50,14 +50,14 @@ describe('DashboardPage', () => {
     };
     statisticsStoreStub = { statistics: () => [] };
     dialogOpenSpy = vi.fn();
-    notifySpy = { showInfo: vi.fn() };
+    taskDialogStub = { createTask: vi.fn(), editTask: vi.fn() };
 
     return render(DashboardPage, {
       providers: [
         { provide: TaskStore, useValue: taskStoreStub },
         { provide: StatisticsStore, useValue: statisticsStoreStub },
         { provide: MatDialog, useValue: { open: dialogOpenSpy } },
-        { provide: NotificationService, useValue: notifySpy },
+        { provide: TaskDialogService, useValue: taskDialogStub },
       ],
     });
   }
@@ -78,13 +78,24 @@ describe('DashboardPage', () => {
     expect(taskStoreStub.setFilters).toHaveBeenCalledWith({ status: 'done' });
   });
 
-  it('shows an info notice for "New Task" (feature not built yet)', async () => {
+  it('delegates "New Task" to TaskDialogService.createTask()', async () => {
     const user = userEvent.setup();
     await setup();
 
     await user.click(screen.getByRole('button', { name: /new task/i }));
 
-    expect(notifySpy.showInfo).toHaveBeenCalled();
+    expect(taskDialogStub.createTask).toHaveBeenCalled();
+  });
+
+  it('delegates a card\'s "Edit" to TaskDialogService.editTask() with that task', async () => {
+    const user = userEvent.setup();
+    const task = makeTask({ id: 'task-1' });
+    await setup([task]);
+
+    await user.click(screen.getByRole('button', { name: /more actions/i }));
+    await user.click(await screen.findByRole('menuitem', { name: /edit/i }));
+
+    expect(taskDialogStub.editTask).toHaveBeenCalledWith(task);
   });
 
   it('opens a confirm dialog and calls TaskStore.remove when confirmed', async () => {

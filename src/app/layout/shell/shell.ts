@@ -4,6 +4,7 @@ import { RouterOutlet } from '@angular/router';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { TaskStore } from '../../core/stores/task.store';
 import { UserStore } from '../../core/stores/user.store';
+import { TaskDialogService } from '../../features/tasks/task-dialog.service';
 import { Header } from '../header/header';
 import { Sidebar } from '../sidebar/sidebar';
 
@@ -27,6 +28,7 @@ const SEARCH_DEBOUNCE_MS = 300;
 export class Shell {
   private readonly taskStore = inject(TaskStore);
   private readonly userStore = inject(UserStore);
+  private readonly taskDialog = inject(TaskDialogService);
 
   // No auth in this app (out of scope per the brief) — the first user in
   // the mocked directory stands in for "the current user".
@@ -42,5 +44,9 @@ export class Shell {
 
   onSearchChange(term: string): void {
     this.searchTerm.set(term);
+  }
+
+  onNewTask(): void {
+    this.taskDialog.createTask();
   }
 }

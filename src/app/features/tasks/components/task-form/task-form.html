@@ -1,0 +1,129 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="task-form" novalidate>
+  <mat-form-field appearance="outline">
+    <mat-label>Title</mat-label>
+    <input matInput formControlName="title" maxlength="120" />
+    @if (form.controls.title.touched && form.controls.title.invalid) {
+      <mat-error>
+        @if (form.controls.title.hasError('required')) {
+          Title is required.
+        } @else if (form.controls.title.hasError('minlength')) {
+          Title must be at least 3 characters.
+        }
+      </mat-error>
+    }
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Description</mat-label>
+    <textarea matInput formControlName="description" rows="3" maxlength="500"></textarea>
+    @if (form.controls.description.touched && form.controls.description.invalid) {
+      <mat-error>
+        @if (form.controls.description.hasError('required')) {
+          Description is required.
+        } @else if (form.controls.description.hasError('minlength')) {
+          Description must be at least 10 characters.
+        }
+      </mat-error>
+    }
+  </mat-form-field>
+
+  <div class="task-form__row">
+    <mat-form-field appearance="outline">
+      <mat-label>Status</mat-label>
+      <mat-select formControlName="status">
+        <mat-option value="todo">To Do</mat-option>
+        <mat-option value="in_progress">In Progress</mat-option>
+        <mat-option value="done">Done</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Priority</mat-label>
+      <mat-select formControlName="priority">
+        <mat-option value="low">Low</mat-option>
+        <mat-option value="medium">Medium</mat-option>
+        <mat-option value="high">High</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <div class="task-form__row">
+    <mat-form-field appearance="outline">
+      <mat-label>Due date</mat-label>
+      <input matInput type="date" formControlName="dueDate" />
+      @if (form.controls.dueDate.touched && form.controls.dueDate.invalid) {
+        <mat-error>
+          @if (form.controls.dueDate.hasError('required')) {
+            Due date is required.
+          } @else if (form.controls.dueDate.hasError('pastDate')) {
+            Due date can't be in the past.
+          }
+        </mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Assignee</mat-label>
+      <mat-select formControlName="assigneeId">
+        @for (assignee of assignees(); track assignee.id) {
+          <mat-option [value]="assignee.id">{{ assignee.name }}</mat-option>
+        }
+      </mat-select>
+      @if (form.controls.assigneeId.touched && form.controls.assigneeId.invalid) {
+        <mat-error>Please choose an assignee.</mat-error>
+      }
+    </mat-form-field>
+  </div>
+
+  <fieldset class="task-form__tags">
+    <legend>Tags</legend>
+
+    @if (tagsControl.length > 0) {
+      <ul class="task-form__tag-list">
+        @for (tag of tagsControl.controls; track $index; let i = $index) {
+          <li class="task-form__tag">
+            {{ tag.value }}
+            <button
+              type="button"
+              (click)="removeTag(i)"
+              [attr.aria-label]="'Remove tag ' + tag.value"
+            >
+              <mat-icon aria-hidden="true">close</mat-icon>
+            </button>
+          </li>
+        }
+      </ul>
+    }
+
+    <div class="task-form__tag-input">
+      <mat-form-field appearance="outline">
+        <mat-label>Add a tag</mat-label>
+        <input
+          matInput
+          [formControl]="newTagControl"
+          maxlength="20"
+          (keydown.enter)="$event.preventDefault(); onAddTag()"
+        />
+      </mat-form-field>
+      <button
+        type="button"
+        mat-stroked-button
+        [disabled]="tagsControl.length >= 5"
+        (click)="onAddTag()"
+      >
+        Add
+      </button>
+    </div>
+
+    @if (tagsControl.hasError('maxTags')) {
+      <p class="task-form__tag-error">You can add up to 5 tags.</p>
+    }
+  </fieldset>
+
+  <div class="task-form__actions">
+    <button type="button" mat-button (click)="cancelled.emit()">Cancel</button>
+    <button type="submit" mat-flat-button>
+      {{ isCreateMode() ? 'Create Task' : 'Save Changes' }}
+    </button>
+  </div>
+</form>

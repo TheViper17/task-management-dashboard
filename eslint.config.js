@@ -51,6 +51,10 @@ module.exports = tseslint.config(
       ],
       '@typescript-eslint/consistent-type-imports': 'error',
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      // `ignoreStatic` stops false positives on Angular's Validators.required /
+      // .minLength / etc. — genuinely static, `this`-free methods torn off
+      // their class by design, which is the correct way to pass them.
+      '@typescript-eslint/unbound-method': ['error', { ignoreStatic: true }],
     },
   },
   {

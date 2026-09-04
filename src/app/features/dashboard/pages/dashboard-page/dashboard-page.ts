@@ -5,8 +5,9 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { TaskStore } from '../../../../core/stores/task.store';
 import { StatisticsStore } from '../../../../core/stores/statistics.store';
+import { UserStore } from '../../../../core/stores/user.store';
 import { mergeLiveStatistics } from '../../../../core/utils/statistic.utils';
-import type { TaskPriority, TaskStatus, Task } from '../../../../core/models/task.model';
+import type { TaskPatch, TaskPriority, TaskStatus, Task } from '../../../../core/models/task.model';
 import { ConfirmDialog } from '../../../../shared/ui/confirm-dialog/confirm-dialog';
 import { Skeleton } from '../../../../shared/ui/skeleton/skeleton';
 import { TaskDialogService } from '../../../tasks/task-dialog.service';
@@ -35,6 +36,7 @@ const BOARD_STATUSES: readonly TaskStatus[] = ['todo', 'in_progress', 'done'];
 })
 export class DashboardPage {
   protected readonly taskStore = inject(TaskStore);
+  protected readonly userStore = inject(UserStore);
   private readonly statisticsStore = inject(StatisticsStore);
   private readonly dialog = inject(MatDialog);
   private readonly taskDialog = inject(TaskDialogService);
@@ -63,12 +65,23 @@ export class DashboardPage {
     this.taskStore.setFilters({ priority });
   }
 
+  protected onAssigneeChange(assigneeId: string): void {
+    this.taskStore.setFilters({ assigneeId });
+  }
+
   protected onNewTask(): void {
     this.taskDialog.createTask();
   }
 
   protected onEditTask(task: Task): void {
     this.taskDialog.editTask(task);
+  }
+
+  /** Double-click-to-rename on the card — the inline half of "inline or modal" editing. */
+  protected onQuickEditTask(event: { task: Task; patch: TaskPatch }): void {
+    this.taskStore.update(event.task.id, event.patch).catch(() => {
+      // errorInterceptor already surfaced a snackbar for the failure.
+    });
   }
 
   protected onDeleteTask(task: Task): void {

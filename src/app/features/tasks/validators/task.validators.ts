@@ -1,13 +1,50 @@
 import type { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import type { Assignee } from '../../../core/models/task.model';
 
+// Single source of truth for title/description length constraints — used by
+// TaskForm's reactive-forms Validators.min/maxLength below, and by
+// TaskCard's lightweight double-click-to-rename inline editing
+// (validateTitleText/validateDescriptionText), which doesn't use reactive
+// forms but must enforce the same rules so a title/description edited
+// in-place can't drift out of sync with one edited via the modal.
+export const TITLE_MIN_LENGTH = 3;
+export const TITLE_MAX_LENGTH = 120;
+export const DESCRIPTION_MIN_LENGTH = 10;
+export const DESCRIPTION_MAX_LENGTH = 500;
+
+/** Validates a task title typed outside reactive forms; `null` means valid. */
+export function validateTitleText(value: string): string | null {
+  if (!value) return 'Title is required.';
+  if (value.length < TITLE_MIN_LENGTH)
+    return `Title must be at least ${TITLE_MIN_LENGTH} characters.`;
+  if (value.length > TITLE_MAX_LENGTH) return `Title can't exceed ${TITLE_MAX_LENGTH} characters.`;
+  return null;
+}
+
+/** Validates a task description typed outside reactive forms; `null` means valid. */
+export function validateDescriptionText(value: string): string | null {
+  if (!value) return 'Description is required.';
+  if (value.length < DESCRIPTION_MIN_LENGTH) {
+    return `Description must be at least ${DESCRIPTION_MIN_LENGTH} characters.`;
+  }
+  if (value.length > DESCRIPTION_MAX_LENGTH) {
+    return `Description can't exceed ${DESCRIPTION_MAX_LENGTH} characters.`;
+  }
+  return null;
+}
+
 /**
  * Rejects a due date earlier than today. Compares whole days, ignoring
  * time-of-day, so "today" is always valid regardless of the current hour.
+ *
+ * Accepts either a `"YYYY-MM-DD"` string or a `Date` — `TaskForm`'s due-date
+ * control holds a `Date` (mat-datepicker's native adapter), but this is
+ * exercised directly against strings in its own spec, and `new Date(value)`
+ * handles both identically.
  */
 export function notInPastValidator(): ValidatorFn {
-  return (control: AbstractControl<string>): ValidationErrors | null => {
-    const value: string = control.value;
+  return (control: AbstractControl<string | Date | null>): ValidationErrors | null => {
+    const value = control.value;
     if (!value) return null; // let Validators.required handle emptiness
 
     const today = new Date();

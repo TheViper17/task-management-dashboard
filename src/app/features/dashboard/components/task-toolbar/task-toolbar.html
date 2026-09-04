@@ -25,6 +25,21 @@
       <button type="button" mat-menu-item (click)="priorityChange.emit('low')">Low</button>
     </mat-menu>
 
+    <button type="button" mat-stroked-button [matMenuTriggerFor]="assigneeMenu">
+      {{ assigneeLabel() }}
+      <mat-icon aria-hidden="true">arrow_drop_down</mat-icon>
+    </button>
+    <mat-menu #assigneeMenu="matMenu">
+      <button type="button" mat-menu-item (click)="assigneeChange.emit('all')">
+        All Assignees
+      </button>
+      @for (assignee of assignees(); track assignee.id) {
+        <button type="button" mat-menu-item (click)="assigneeChange.emit(assignee.id)">
+          {{ assignee.name }}
+        </button>
+      }
+    </mat-menu>
+
     <button
       type="button"
       mat-flat-button

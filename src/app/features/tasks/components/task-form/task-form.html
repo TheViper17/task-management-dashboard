@@ -50,7 +50,9 @@
   <div class="task-form__row">
     <mat-form-field appearance="outline">
       <mat-label>Due date</mat-label>
-      <input matInput type="date" formControlName="dueDate" />
+      <input matInput [matDatepicker]="dueDatePicker" formControlName="dueDate" />
+      <mat-datepicker-toggle matIconSuffix [for]="dueDatePicker" />
+      <mat-datepicker #dueDatePicker />
       @if (form.controls.dueDate.touched && form.controls.dueDate.invalid) {
         <mat-error>
           @if (form.controls.dueDate.hasError('required')) {

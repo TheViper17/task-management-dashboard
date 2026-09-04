@@ -61,6 +61,23 @@ describe('BoardColumn', () => {
     expect(edited).toEqual([task]);
   });
 
+  it("re-emits a card's quickEdit as taskQuickEdit, paired with its task", async () => {
+    const user = userEvent.setup();
+    const task = makeTask({ id: '1', title: 'Design homepage' });
+    const { fixture } = await render(BoardColumn, {
+      inputs: { title: 'To Do', status: 'todo', tasks: [task] },
+    });
+    const quickEdits: unknown[] = [];
+    fixture.componentInstance.taskQuickEdit.subscribe((e) => quickEdits.push(e));
+
+    await user.dblClick(screen.getByText('Design homepage'));
+    // The title input selects all its text on focus (for a quick full
+    // rename) — {End} first so this appends instead of replacing it.
+    await user.keyboard('{End}d{enter}'); // -> "Design homepaged", still valid
+
+    expect(quickEdits).toEqual([{ task, patch: { title: 'Design homepaged' } }]);
+  });
+
   describe('drag and drop', () => {
     it('derives its drop-list id from the status input', async () => {
       const { fixture } = await render(BoardColumn, {

@@ -21,6 +21,7 @@
         [task]="task"
         (edit)="taskEdit.emit(task)"
         (delete)="taskDelete.emit(task)"
+        (quickEdit)="taskQuickEdit.emit({ task, patch: $event })"
       />
     } @empty {
       <p class="board-column__empty">No tasks here.</p>

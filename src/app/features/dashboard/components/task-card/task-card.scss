@@ -72,11 +72,66 @@
   color: var(--app-text-muted);
 }
 
+// Not part of .task-card__handle — see the HTML comment above it. Same
+// flex-column + inherited gap as the handle, so pulling title/description
+// out into their own wrapper doesn't disturb the card's overall spacing.
+.task-card__editable {
+  display: flex;
+  flex-direction: column;
+  gap: inherit;
+}
+
 .task-card__title {
   margin: 0;
   font-size: 0.9375rem;
   font-weight: 600;
   color: var(--app-text);
+}
+
+.task-card__title--editable,
+.task-card__description--editable {
+  border-radius: var(--app-radius-sm);
+  cursor: text;
+
+  // A hint that double-clicking does something, without adding a
+  // permanent visual (icon/border) to every card at rest.
+  &:hover {
+    background: var(--app-surface-hover);
+  }
+}
+
+.task-card__title-input,
+.task-card__description-input {
+  width: 100%;
+  padding: 0;
+  border: none;
+  outline: 2px solid var(--app-primary);
+  outline-offset: 2px;
+  border-radius: var(--app-radius-sm);
+  background: transparent;
+  color: var(--app-text);
+  font: inherit;
+
+  &[aria-invalid='true'] {
+    outline-color: var(--app-priority-high);
+  }
+}
+
+.task-card__title-input {
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.task-card__description-input {
+  resize: vertical;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+.task-card__edit-error {
+  margin: 0;
+  color: var(--app-priority-high);
+  font-size: 0.75rem;
 }
 
 .task-card__description {
@@ -90,10 +145,24 @@
   overflow: hidden;
 }
 
-.task-card__tag {
+// A row of every tag, not just the first — previously this rendered only
+// `tags()[0]`, so a task with several tags silently hid the rest.
+.task-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--app-space-1);
   margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.task-card__tag {
+  padding: 1px var(--app-space-2);
+  border-radius: var(--app-radius-sm);
+  background: var(--app-surface-hover);
   color: var(--app-text-muted);
   font-size: 0.75rem;
+  line-height: 1.4;
 }
 
 .task-card__footer {

@@ -1,12 +1,19 @@
 import { ChangeDetectionStrategy, Component, computed, effect, input, output } from '@angular/core';
 import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MAT_DATE_LOCALE, provideNativeDateAdapter } from '@angular/material/core';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import type { Assignee, CreateTaskDto, Task } from '../../../../core/models/task.model';
+import { parseIsoDateLocal, toIsoDateString } from '../../../../core/utils/date.utils';
 import {
+  DESCRIPTION_MAX_LENGTH,
+  DESCRIPTION_MIN_LENGTH,
+  TITLE_MAX_LENGTH,
+  TITLE_MIN_LENGTH,
   assigneeExistsValidator,
   maxTagsValidator,
   nonBlankValidator,
@@ -36,11 +43,18 @@ const MAX_TAGS = 5;
   imports: [
     ReactiveFormsModule,
     MatButtonModule,
+    MatDatepickerModule,
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
     MatSelectModule,
   ],
+  // Scoped here, not app-wide (app.config.ts) — the datepicker is only ever
+  // used by this form, so its adapter shouldn't ride along in every route's
+  // bundle. MAT_DATE_LOCALE is pinned rather than left to inherit the
+  // browser/OS locale so the due-date field's displayed format (and this
+  // component's own spec, which asserts on it) is deterministic everywhere.
+  providers: [provideNativeDateAdapter(), { provide: MAT_DATE_LOCALE, useValue: 'en-US' }],
   templateUrl: './task-form.html',
   styleUrl: './task-form.scss',
 })
@@ -60,11 +74,19 @@ export class TaskForm {
   protected readonly form = new FormGroup({
     title: new FormControl('', {
       nonNullable: true,
-      validators: [Validators.required, Validators.minLength(3), Validators.maxLength(120)],
+      validators: [
+        Validators.required,
+        Validators.minLength(TITLE_MIN_LENGTH),
+        Validators.maxLength(TITLE_MAX_LENGTH),
+      ],
     }),
     description: new FormControl('', {
       nonNullable: true,
-      validators: [Validators.required, Validators.minLength(10), Validators.maxLength(500)],
+      validators: [
+        Validators.required,
+        Validators.minLength(DESCRIPTION_MIN_LENGTH),
+        Validators.maxLength(DESCRIPTION_MAX_LENGTH),
+      ],
     }),
     status: new FormControl<Task['status']>('todo', {
       nonNullable: true,
@@ -74,7 +96,11 @@ export class TaskForm {
       nonNullable: true,
       validators: [Validators.required],
     }),
-    dueDate: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+    // Holds a `Date`, not the app's usual `"YYYY-MM-DD"` string — that's
+    // what mat-datepicker's native adapter speaks. Converted at the two
+    // boundaries this component owns: `parseIsoDateLocal`/`toIsoDateString`
+    // in the effect below and in `onSubmit()`.
+    dueDate: new FormControl<Date | null>(null, { validators: [Validators.required] }),
     assigneeId: new FormControl('', {
       nonNullable: true,
       validators: [Validators.required, assigneeExistsValidator(() => this.assignees())],
@@ -100,7 +126,7 @@ export class TaskForm {
           description: task.description,
           status: task.status,
           priority: task.priority,
-          dueDate: task.dueDate,
+          dueDate: parseIsoDateLocal(task.dueDate),
           assigneeId: task.assigneeId,
         });
         this.setTags(task.tags);
@@ -132,13 +158,15 @@ export class TaskForm {
       return;
     }
 
+    // Non-null: `dueDate` is `Validators.required`, and the form is valid
+    // at this point, so the calendar/typed value is always present here.
     const value = this.form.getRawValue();
     this.save.emit({
       title: value.title,
       description: value.description,
       status: value.status,
       priority: value.priority,
-      dueDate: value.dueDate,
+      dueDate: toIsoDateString(value.dueDate!),
       assigneeId: value.assigneeId,
       tags: value.tags,
     });

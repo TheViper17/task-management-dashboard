@@ -2,12 +2,17 @@ import { MatDialog } from '@angular/material/dialog';
 import { render, screen } from '@testing-library/angular';
 import userEvent from '@testing-library/user-event';
 import { of } from 'rxjs';
-import type { Task, TaskFilters } from '../../../../core/models/task.model';
+import type { Assignee, Task, TaskFilters } from '../../../../core/models/task.model';
 import { DEFAULT_TASK_FILTERS } from '../../../../core/models/task.model';
 import { StatisticsStore } from '../../../../core/stores/statistics.store';
 import { TaskStore } from '../../../../core/stores/task.store';
+import { UserStore } from '../../../../core/stores/user.store';
 import { TaskDialogService } from '../../../tasks/task-dialog.service';
 import { DashboardPage } from './dashboard-page';
+
+const ASSIGNEES: Assignee[] = [
+  { id: 'user-1', name: 'Sarah Smith', avatar: 'SS', email: 'sarah@company.com' },
+];
 
 function makeTask(overrides: Partial<Task> = {}): Task {
   return {
@@ -40,8 +45,10 @@ describe('DashboardPage', () => {
     remove: ReturnType<typeof vi.fn>;
     reload: ReturnType<typeof vi.fn>;
     move: ReturnType<typeof vi.fn>;
+    update: ReturnType<typeof vi.fn>;
   };
   let statisticsStoreStub: { statistics: () => unknown[] };
+  let userStoreStub: { users: () => Assignee[] };
   let dialogOpenSpy: ReturnType<typeof vi.fn>;
   let taskDialogStub: { createTask: ReturnType<typeof vi.fn>; editTask: ReturnType<typeof vi.fn> };
 
@@ -64,8 +71,10 @@ describe('DashboardPage', () => {
       remove: vi.fn().mockResolvedValue(undefined),
       reload: vi.fn(),
       move: vi.fn().mockResolvedValue(undefined),
+      update: vi.fn().mockResolvedValue(undefined),
     };
     statisticsStoreStub = { statistics: () => [] };
+    userStoreStub = { users: () => ASSIGNEES };
     dialogOpenSpy = vi.fn();
     taskDialogStub = { createTask: vi.fn(), editTask: vi.fn() };
 
@@ -73,6 +82,7 @@ describe('DashboardPage', () => {
       providers: [
         { provide: TaskStore, useValue: taskStoreStub },
         { provide: StatisticsStore, useValue: statisticsStoreStub },
+        { provide: UserStore, useValue: userStoreStub },
         { provide: MatDialog, useValue: { open: dialogOpenSpy } },
         { provide: TaskDialogService, useValue: taskDialogStub },
       ],
@@ -95,6 +105,16 @@ describe('DashboardPage', () => {
     expect(taskStoreStub.setFilters).toHaveBeenCalledWith({ status: 'done' });
   });
 
+  it('calls TaskStore.setFilters when an assignee filter is chosen', async () => {
+    const user = userEvent.setup();
+    await setup();
+
+    await user.click(screen.getByRole('button', { name: /assignee/i }));
+    await user.click(await screen.findByRole('menuitem', { name: 'Sarah Smith' }));
+
+    expect(taskStoreStub.setFilters).toHaveBeenCalledWith({ assigneeId: 'user-1' });
+  });
+
   it('delegates "New Task" to TaskDialogService.createTask()', async () => {
     const user = userEvent.setup();
     await setup();
@@ -113,6 +133,17 @@ describe('DashboardPage', () => {
     await user.click(await screen.findByRole('menuitem', { name: /edit/i }));
 
     expect(taskDialogStub.editTask).toHaveBeenCalledWith(task);
+  });
+
+  it('calls TaskStore.update when a card is renamed inline', async () => {
+    const user = userEvent.setup();
+    const task = makeTask({ id: 'task-1', title: 'Design homepage' });
+    await setup({ todoTasks: [task] });
+
+    await user.dblClick(screen.getByText('Design homepage'));
+    await user.keyboard('{End}!{enter}'); // -> "Design homepage!"
+
+    expect(taskStoreStub.update).toHaveBeenCalledWith('task-1', { title: 'Design homepage!' });
   });
 
   it('opens a confirm dialog and calls TaskStore.remove when confirmed', async () => {

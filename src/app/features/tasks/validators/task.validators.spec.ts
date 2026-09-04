@@ -5,7 +5,49 @@ import {
   maxTagsValidator,
   nonBlankValidator,
   notInPastValidator,
+  validateDescriptionText,
+  validateTitleText,
 } from './task.validators';
+
+describe('validateTitleText', () => {
+  it('rejects an empty title', () => {
+    expect(validateTitleText('')).toBe('Title is required.');
+  });
+
+  it('rejects a title under 3 characters', () => {
+    expect(validateTitleText('ab')).toBe('Title must be at least 3 characters.');
+  });
+
+  it('rejects a title over 120 characters', () => {
+    expect(validateTitleText('a'.repeat(121))).toBe("Title can't exceed 120 characters.");
+  });
+
+  it('accepts a title within range', () => {
+    expect(validateTitleText('Design homepage')).toBeNull();
+  });
+});
+
+describe('validateDescriptionText', () => {
+  it('rejects an empty description', () => {
+    expect(validateDescriptionText('')).toBe('Description is required.');
+  });
+
+  it('rejects a description under 10 characters', () => {
+    expect(validateDescriptionText('too short')).toBe(
+      'Description must be at least 10 characters.',
+    );
+  });
+
+  it('rejects a description over 500 characters', () => {
+    expect(validateDescriptionText('a'.repeat(501))).toBe(
+      "Description can't exceed 500 characters.",
+    );
+  });
+
+  it('accepts a description within range', () => {
+    expect(validateDescriptionText('Create wireframes and mockups')).toBeNull();
+  });
+});
 
 describe('notInPastValidator', () => {
   beforeEach(() => {
@@ -33,6 +75,15 @@ describe('notInPastValidator', () => {
   it('fails for a past date', () => {
     const control = new FormControl('2026-09-01');
     expect(notInPastValidator()(control)).toEqual({ pastDate: true });
+  });
+
+  // TaskForm's due-date control holds a Date (mat-datepicker's native
+  // adapter), not the "YYYY-MM-DD" string every test above uses.
+  it('accepts and rejects a Date value identically to the equivalent string', () => {
+    expect(notInPastValidator()(new FormControl(new Date(2026, 8, 10)))).toBeNull();
+    expect(notInPastValidator()(new FormControl(new Date(2026, 8, 1)))).toEqual({
+      pastDate: true,
+    });
   });
 });
 

@@ -1,6 +1,33 @@
 import type { Task } from '../models/task.model';
 import { daysUntil } from './task.utils';
 
+/**
+ * Converts a JS `Date` (as produced by `mat-datepicker`'s calendar, which
+ * always constructs dates via `new Date(year, month, day)` in local time) to
+ * the app's wire format, `"YYYY-MM-DD"`. Deliberately reads local
+ * year/month/date getters rather than `date.toISOString().slice(0, 10)` —
+ * `toISOString()` converts to UTC first, which would silently roll the date
+ * back a day for anyone west of UTC.
+ */
+export function toIsoDateString(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+/**
+ * Parses the app's `"YYYY-MM-DD"` wire format into a local-midnight `Date`,
+ * the inverse of `toIsoDateString()`. Deliberately not `new Date(iso)` —
+ * that parses as UTC midnight per spec, which display code (this app's own
+ * `Date`-based getters, and mat-datepicker's calendar) would then read back
+ * as the previous day for anyone west of UTC.
+ */
+export function parseIsoDateLocal(iso: string): Date {
+  const [year, month, day] = iso.split('-').map(Number);
+  return new Date(year, month - 1, day);
+}
+
 export type DueDateTone = 'overdue' | 'done' | 'default';
 
 export interface DueDateInfo {

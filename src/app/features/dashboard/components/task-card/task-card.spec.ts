@@ -41,6 +41,21 @@ describe('TaskCard', () => {
     expect(screen.getByText('SS')).toBeInTheDocument(); // avatar initials
   });
 
+  it('renders every tag, not just the first', async () => {
+    await render(TaskCard, {
+      inputs: { task: makeTask({ tags: ['Design', 'Frontend', 'Urgent'] }) },
+    });
+    expect(screen.getByText('Design')).toBeInTheDocument();
+    expect(screen.getByText('Frontend')).toBeInTheDocument();
+    expect(screen.getByText('Urgent')).toBeInTheDocument();
+  });
+
+  it('renders no tag list when the task has no tags', async () => {
+    const { fixture } = await render(TaskCard, { inputs: { task: makeTask({ tags: [] }) } });
+    const host = fixture.nativeElement as HTMLElement;
+    expect(host.querySelector('.task-card__tags')).toBeNull();
+  });
+
   it('applies a status-derived accent class for a task that is not overdue', async () => {
     const { fixture } = await render(TaskCard, {
       inputs: { task: makeTask({ status: 'in_progress', dueDate: '2026-09-20' }) },
@@ -118,5 +133,123 @@ describe('TaskCard', () => {
     // so this is an actual elapsed wait, not a simulated tick.
     await new Promise((resolve) => setTimeout(resolve, 300));
     expect(screen.getByRole('menuitem', { name: /edit/i })).toBeInTheDocument();
+  });
+
+  describe('inline edit (double-click title/description)', () => {
+    it('double-clicking the title swaps it for a focused, pre-filled input', async () => {
+      const user = userEvent.setup();
+      await render(TaskCard, { inputs: { task: makeTask() } });
+
+      await user.dblClick(screen.getByText('Design homepage'));
+
+      const input = screen.getByRole('textbox', { name: 'Title for Design homepage' });
+      expect(input).toHaveValue('Design homepage');
+      expect(input).toHaveFocus();
+    });
+
+    it('commits a renamed title on Enter and emits quickEdit with just the title', async () => {
+      const user = userEvent.setup();
+      const { fixture } = await render(TaskCard, { inputs: { task: makeTask() } });
+      const emitted: unknown[] = [];
+      fixture.componentInstance.quickEdit.subscribe((patch) => emitted.push(patch));
+
+      await user.dblClick(screen.getByText('Design homepage'));
+      const input = screen.getByRole('textbox', { name: 'Title for Design homepage' });
+      await user.clear(input);
+      await user.type(input, 'Design the new homepage{enter}');
+
+      // Commits by emitting the patch upward, not by rewriting its own
+      // `task` input — that's TaskStore's job once the PATCH round-trips
+      // (see DashboardPage.onQuickEditTask). Here, with `task` untouched,
+      // the card exits edit mode and simply displays the original title again.
+      expect(emitted).toEqual([{ title: 'Design the new homepage' }]);
+      expect(screen.queryByRole('textbox', { name: /title for/i })).not.toBeInTheDocument();
+      expect(screen.getByText('Design homepage')).toBeInTheDocument();
+    });
+
+    it('commits on blur too, not just Enter', async () => {
+      const user = userEvent.setup();
+      const { fixture } = await render(TaskCard, { inputs: { task: makeTask() } });
+      const emitted: unknown[] = [];
+      fixture.componentInstance.quickEdit.subscribe((patch) => emitted.push(patch));
+
+      await user.dblClick(screen.getByText('Design homepage'));
+      const input = screen.getByRole('textbox', { name: 'Title for Design homepage' });
+      await user.clear(input);
+      await user.type(input, 'Renamed via blur');
+      await user.tab(); // moves focus away -> blur
+
+      expect(emitted).toEqual([{ title: 'Renamed via blur' }]);
+    });
+
+    it('cancels on Escape without emitting, reverting to the original title', async () => {
+      const user = userEvent.setup();
+      const { fixture } = await render(TaskCard, { inputs: { task: makeTask() } });
+      const emitted: unknown[] = [];
+      fixture.componentInstance.quickEdit.subscribe((patch) => emitted.push(patch));
+
+      await user.dblClick(screen.getByText('Design homepage'));
+      const input = screen.getByRole('textbox', { name: 'Title for Design homepage' });
+      await user.clear(input);
+      await user.type(input, 'This should not be saved{escape}');
+
+      expect(emitted).toEqual([]);
+      expect(screen.getByText('Design homepage')).toBeInTheDocument();
+    });
+
+    it('shows a validation error and keeps editing instead of emitting an invalid title', async () => {
+      const user = userEvent.setup();
+      const { fixture } = await render(TaskCard, { inputs: { task: makeTask() } });
+      const emitted: unknown[] = [];
+      fixture.componentInstance.quickEdit.subscribe((patch) => emitted.push(patch));
+
+      await user.dblClick(screen.getByText('Design homepage'));
+      const input = screen.getByRole('textbox', { name: 'Title for Design homepage' });
+      await user.clear(input);
+      await user.type(input, 'ab{enter}'); // under the 3-character minimum
+
+      expect(screen.getByRole('alert')).toHaveTextContent('Title must be at least 3 characters.');
+      expect(emitted).toEqual([]);
+      expect(screen.getByRole('textbox', { name: /title for/i })).toBeInTheDocument(); // still editing
+    });
+
+    it('does not emit when the title is unchanged', async () => {
+      const user = userEvent.setup();
+      const { fixture } = await render(TaskCard, { inputs: { task: makeTask() } });
+      const emitted: unknown[] = [];
+      fixture.componentInstance.quickEdit.subscribe((patch) => emitted.push(patch));
+
+      await user.dblClick(screen.getByText('Design homepage'));
+      await user.keyboard('{enter}'); // commit with no changes made
+
+      expect(emitted).toEqual([]);
+    });
+
+    it('does not enter edit mode for an optimistic (not-yet-confirmed) task', async () => {
+      const user = userEvent.setup();
+      await render(TaskCard, { inputs: { task: makeTask({ id: 'optimistic-abc123' }) } });
+
+      await user.dblClick(screen.getByText('Design homepage'));
+
+      expect(screen.queryByRole('textbox', { name: /title for/i })).not.toBeInTheDocument();
+    });
+
+    it('double-clicking the description commits on Ctrl+Enter, not plain Enter', async () => {
+      const user = userEvent.setup();
+      const { fixture } = await render(TaskCard, { inputs: { task: makeTask() } });
+      const emitted: unknown[] = [];
+      fixture.componentInstance.quickEdit.subscribe((patch) => emitted.push(patch));
+
+      await user.dblClick(screen.getByText('Create wireframes and mockups'));
+      const textarea = screen.getByRole('textbox', { name: 'Description for Design homepage' });
+      await user.clear(textarea);
+      await user.type(textarea, 'Line one{enter}Line two'); // plain Enter: newline, not commit
+
+      expect(emitted).toEqual([]);
+      expect(textarea).toHaveValue('Line one\nLine two');
+
+      await user.type(textarea, '{control>}{enter}{/control}');
+      expect(emitted).toEqual([{ description: 'Line one\nLine two' }]);
+    });
   });
 });

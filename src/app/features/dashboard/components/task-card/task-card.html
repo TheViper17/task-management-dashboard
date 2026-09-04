@@ -24,6 +24,63 @@
   </div>
 
   <!--
+    Title/description are also excluded from the drag handle below, same
+    reasoning as the menu trigger, plus one more: they're double-click-to-edit
+    now, and a plain text input/textarea inside a drag handle would fight the
+    user over any click-drag they make to select text.
+  -->
+  <div class="task-card__editable">
+    @if (editingField() === 'title') {
+      <input
+        #titleInput
+        class="task-card__title task-card__title-input"
+        [value]="draftValue()"
+        (input)="draftValue.set(titleInput.value)"
+        (keydown)="onTitleKeydown($event)"
+        (blur)="commitEdit()"
+        maxlength="120"
+        [attr.aria-label]="'Title for ' + task().title"
+        [attr.aria-invalid]="!!draftError()"
+      />
+    } @else {
+      <h3
+        class="task-card__title"
+        [class.task-card__title--editable]="!isPending()"
+        (dblclick)="startEditing('title')"
+      >
+        {{ task().title }}
+      </h3>
+    }
+
+    @if (editingField() === 'description') {
+      <textarea
+        #descriptionInput
+        class="task-card__description task-card__description-input"
+        [value]="draftValue()"
+        (input)="draftValue.set(descriptionInput.value)"
+        (keydown)="onDescriptionKeydown($event)"
+        (blur)="commitEdit()"
+        rows="3"
+        maxlength="500"
+        [attr.aria-label]="'Description for ' + task().title"
+        [attr.aria-invalid]="!!draftError()"
+      ></textarea>
+    } @else {
+      <p
+        class="task-card__description"
+        [class.task-card__description--editable]="!isPending()"
+        (dblclick)="startEditing('description')"
+      >
+        {{ task().description }}
+      </p>
+    }
+
+    @if (editingField() && draftError(); as error) {
+      <p class="task-card__edit-error" role="alert">{{ error }}</p>
+    }
+  </div>
+
+  <!--
     Everything below is the drag handle, not the whole card — the top row
     (menu trigger) is deliberately excluded. cdkDrag listens for pointerdown
     on its entire host by default; with the menu button inside that host,
@@ -35,17 +92,18 @@
     as normal, unblocked interactive elements again.
   -->
   <div class="task-card__handle" cdkDragHandle>
-    <h3 class="task-card__title">{{ task().title }}</h3>
-    <p class="task-card__description">{{ task().description }}</p>
-
     <app-due-date-chip
       [dueDate]="task().dueDate"
       [status]="task().status"
       [completedAt]="task().completedAt"
     />
 
-    @if (tag(); as tag) {
-      <p class="task-card__tag">{{ tag }}</p>
+    @if (tags().length > 0) {
+      <ul class="task-card__tags">
+        @for (tag of tags(); track tag) {
+          <li class="task-card__tag">{{ tag }}</li>
+        }
+      </ul>
     }
 
     <div class="task-card__footer">

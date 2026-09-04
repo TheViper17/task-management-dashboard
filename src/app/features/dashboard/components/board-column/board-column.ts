@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import type { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { CdkDrag, CdkDropList } from '@angular/cdk/drag-drop';
-import type { Task, TaskStatus } from '../../../../core/models/task.model';
+import type { Task, TaskPatch, TaskStatus } from '../../../../core/models/task.model';
 import { isOptimisticId } from '../../../../core/utils/id.utils';
 import { TaskCard } from '../task-card/task-card';
 import { boardColumnListId } from '../../utils/board-drag-drop.utils';
@@ -34,6 +34,7 @@ export class BoardColumn {
 
   readonly taskEdit = output<Task>();
   readonly taskDelete = output<Task>();
+  readonly taskQuickEdit = output<{ task: Task; patch: TaskPatch }>();
   readonly taskMoved = output<CdkDragDrop<readonly Task[]>>();
 
   protected readonly listId = computed(() => boardColumnListId(this.status()));

@@ -67,6 +67,24 @@ describe('TaskForm', () => {
       expect(screen.getByText("Due date can't be in the past.")).toBeInTheDocument();
     });
 
+    it('opens a calendar to pick the due date, instead of typing only', async () => {
+      const user = userEvent.setup();
+      const { fixture } = await render(TaskForm, { inputs: { assignees: ASSIGNEES } });
+
+      await user.click(screen.getByRole('button', { name: /open calendar/i }));
+      // The 20th of the currently-open month (September 2026, per the fixed clock).
+      await user.click(await screen.findByRole('button', { name: 'September 20, 2026' }));
+
+      // Asserted on the reactive form's own value, not the input's rendered
+      // text — the overlay's close animation isn't synchronous, and the
+      // calendar dialog is itself aria-labelledby "Due date" while it's
+      // still around, which makes DOM-text assertions racy here.
+      const component = fixture.componentInstance as unknown as {
+        form: { controls: { dueDate: { value: Date | null } } };
+      };
+      expect(component.form.controls.dueDate.value).toEqual(new Date(2026, 8, 20));
+    });
+
     it('does not submit while invalid, and marks fields touched instead', async () => {
       const user = userEvent.setup();
       const { fixture } = await render(TaskForm, { inputs: { assignees: ASSIGNEES } });
@@ -181,7 +199,9 @@ describe('TaskForm', () => {
 
       expect(screen.getByLabelText('Title')).toHaveValue('Design homepage');
       expect(screen.getByLabelText('Description')).toHaveValue('Create wireframes and mockups');
-      expect(screen.getByLabelText('Due date')).toHaveValue('2026-08-01');
+      // Displayed via the datepicker's own format (MAT_DATE_LOCALE 'en-US'),
+      // not the "YYYY-MM-DD" wire format task.dueDate is stored as.
+      expect(screen.getByLabelText('Due date')).toHaveValue('8/1/2026');
       expect(screen.getByText('Design')).toBeInTheDocument();
       expect(screen.getByText('Frontend')).toBeInTheDocument();
     });

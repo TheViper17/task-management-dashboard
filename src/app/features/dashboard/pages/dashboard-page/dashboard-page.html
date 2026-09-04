@@ -45,8 +45,11 @@
     <app-task-toolbar
       [activeStatus]="taskStore.filters().status"
       [activePriority]="taskStore.filters().priority"
+      [activeAssigneeId]="taskStore.filters().assigneeId"
+      [assignees]="userStore.users()"
       (statusChange)="onStatusChange($event)"
       (priorityChange)="onPriorityChange($event)"
+      (assigneeChange)="onAssigneeChange($event)"
       (newTaskClick)="onNewTask()"
     />
 
@@ -58,6 +61,7 @@
         [connectedLists]="connectedLists"
         (taskEdit)="onEditTask($event)"
         (taskDelete)="onDeleteTask($event)"
+        (taskQuickEdit)="onQuickEditTask($event)"
         (taskMoved)="onTaskMoved($event)"
       />
       <app-board-column
@@ -67,6 +71,7 @@
         [connectedLists]="connectedLists"
         (taskEdit)="onEditTask($event)"
         (taskDelete)="onDeleteTask($event)"
+        (taskQuickEdit)="onQuickEditTask($event)"
         (taskMoved)="onTaskMoved($event)"
       />
       <app-board-column
@@ -76,6 +81,7 @@
         [connectedLists]="connectedLists"
         (taskEdit)="onEditTask($event)"
         (taskDelete)="onDeleteTask($event)"
+        (taskQuickEdit)="onQuickEditTask($event)"
         (taskMoved)="onTaskMoved($event)"
       />
     </div>

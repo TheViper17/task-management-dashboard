@@ -1,4 +1,4 @@
-import { describeDueDate } from './date.utils';
+import { describeDueDate, formatRelativeTime } from './date.utils';
 
 describe('describeDueDate', () => {
   beforeEach(() => {
@@ -53,5 +53,37 @@ describe('describeDueDate', () => {
 
   it('a done task is never overdue, even with a long-past due date', () => {
     expect(describeDueDate('2020-01-01', 'done', '2026-09-04T09:00:00.000Z').tone).toBe('done');
+  });
+});
+
+describe('formatRelativeTime', () => {
+  const now = new Date('2026-09-04T12:00:00.000Z');
+
+  it('reports "just now" for anything under a minute old', () => {
+    expect(formatRelativeTime('2026-09-04T11:59:30.000Z', now)).toBe('just now');
+  });
+
+  it('reports minutes, pluralised correctly', () => {
+    expect(formatRelativeTime('2026-09-04T11:59:00.000Z', now)).toBe('1 minute ago');
+    expect(formatRelativeTime('2026-09-04T11:45:00.000Z', now)).toBe('15 minutes ago');
+  });
+
+  it('reports hours once past 60 minutes', () => {
+    expect(formatRelativeTime('2026-09-04T11:00:00.000Z', now)).toBe('1 hour ago');
+    expect(formatRelativeTime('2026-09-04T09:00:00.000Z', now)).toBe('3 hours ago');
+  });
+
+  it('reports days once past 24 hours', () => {
+    expect(formatRelativeTime('2026-09-03T12:00:00.000Z', now)).toBe('1 day ago');
+    expect(formatRelativeTime('2026-09-01T12:00:00.000Z', now)).toBe('3 days ago');
+  });
+
+  it('reports weeks once past 7 days', () => {
+    expect(formatRelativeTime('2026-08-28T12:00:00.000Z', now)).toBe('1 week ago');
+    expect(formatRelativeTime('2026-08-14T12:00:00.000Z', now)).toBe('3 weeks ago');
+  });
+
+  it('never reports a negative duration for a timestamp slightly in the future (clock skew)', () => {
+    expect(formatRelativeTime('2026-09-04T12:00:05.000Z', now)).toBe('just now');
   });
 });

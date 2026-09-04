@@ -1,0 +1,32 @@
+@use 'tokens' as *;
+
+.analytics-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-space-6);
+}
+
+.analytics-page__charts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--app-space-4);
+
+  @include below('tablet') {
+    grid-template-columns: 1fr;
+  }
+}
+
+.analytics-card {
+  padding: var(--app-space-5);
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-lg);
+  box-shadow: var(--app-elevation-card);
+
+  h2 {
+    margin: 0 0 var(--app-space-4);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--app-text);
+  }
+}

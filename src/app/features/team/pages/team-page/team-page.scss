@@ -1,0 +1,21 @@
+@use 'tokens' as *;
+
+.team-page__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--app-space-4);
+
+  @include below('tablet') {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @include below('mobile') {
+    grid-template-columns: 1fr;
+  }
+}
+
+.team-page__status {
+  padding: var(--app-space-8);
+  text-align: center;
+  color: var(--app-text-muted);
+}

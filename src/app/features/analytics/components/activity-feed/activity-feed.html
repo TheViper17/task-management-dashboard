@@ -1,0 +1,18 @@
+<ul class="activity-feed">
+  @for (entry of entries(); track entry.id) {
+    <li class="activity-feed__item">
+      <mat-icon aria-hidden="true" class="activity-feed__icon">{{ icon(entry.type) }}</mat-icon>
+      <div class="activity-feed__body">
+        <p>
+          You {{ verb(entry.type) }} <strong>{{ entry.taskTitle }}</strong>
+          @if (entry.detail) {
+            <span class="activity-feed__detail">({{ entry.detail }})</span>
+          }
+        </p>
+        <time [attr.datetime]="entry.at">{{ relativeTime(entry.at) }}</time>
+      </div>
+    </li>
+  } @empty {
+    <li class="activity-feed__empty">No recent activity.</li>
+  }
+</ul>

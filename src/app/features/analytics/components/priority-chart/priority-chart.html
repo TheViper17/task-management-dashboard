@@ -1,0 +1,11 @@
+<div class="priority-chart">
+  <div class="priority-chart__canvas">
+    <canvas baseChart [data]="chartData()" [options]="chartOptions" type="doughnut"></canvas>
+  </div>
+
+  <ul class="sr-only">
+    @for (priority of priorities; track priority) {
+      <li>{{ label(priority) }}: {{ data()[priority] }} tasks</li>
+    }
+  </ul>
+</div>

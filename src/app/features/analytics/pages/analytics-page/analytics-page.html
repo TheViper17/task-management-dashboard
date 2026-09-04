@@ -1,0 +1,18 @@
+<div class="analytics-page">
+  <div class="analytics-page__charts">
+    <section class="analytics-card">
+      <h2>Tasks by Priority</h2>
+      <app-priority-chart [data]="taskStore.priorityMix()" />
+    </section>
+
+    <section class="analytics-card">
+      <h2>Tasks by Status</h2>
+      <app-status-chart [data]="taskStore.statusMix()" />
+    </section>
+  </div>
+
+  <section class="analytics-card">
+    <h2>Recent Activity</h2>
+    <app-activity-feed [entries]="activityStore.entries()" />
+  </section>
+</div>

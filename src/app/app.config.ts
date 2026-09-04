@@ -34,5 +34,12 @@ export const appConfig: ApplicationConfig = {
 
     { provide: API_BASE_URL, useValue: '/api' },
     { provide: CACHE_TTL_MS, useValue: CACHE_TTL_DEFAULT_MS },
+
+    // provideCharts(withDefaultRegisterables()) is intentionally NOT here —
+    // it's scoped to AnalyticsPage's own component providers instead. Chart.js
+    // is a genuinely heavy dependency; providing it at the root pulls it into
+    // the eager bundle even though every chart-using component is behind a
+    // lazy route, blowing the production budget by ~180kB for a chart no one
+    // may ever look at. See analytics-page.ts.
   ],
 };

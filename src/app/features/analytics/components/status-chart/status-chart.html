@@ -1,0 +1,11 @@
+<div class="status-chart">
+  <div class="status-chart__canvas">
+    <canvas baseChart [data]="chartData()" [options]="chartOptions" type="bar"></canvas>
+  </div>
+
+  <ul class="sr-only">
+    @for (status of statuses; track status) {
+      <li>{{ label(status) }}: {{ data()[status] }} tasks</li>
+    }
+  </ul>
+</div>

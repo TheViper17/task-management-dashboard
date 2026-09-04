@@ -48,3 +48,27 @@ function formatCompletedLabel(completedAt: string | undefined): string {
   if (days === -1) return 'Completed yesterday';
   return 'Completed';
 }
+
+const MINUTE_MS = 60_000;
+const HOUR_MS = 60 * MINUTE_MS;
+const DAY_MS = 24 * HOUR_MS;
+const WEEK_MS = 7 * DAY_MS;
+
+/**
+ * Formats an ISO datetime as "N minutes/hours/days/weeks ago" for the
+ * activity feed. Takes `now` as a parameter (defaulting to `new Date()`)
+ * purely so tests can pass a fixed instant instead of mocking the clock.
+ */
+export function formatRelativeTime(iso: string, now: Date = new Date()): string {
+  const diffMs = Math.max(0, now.getTime() - new Date(iso).getTime());
+
+  if (diffMs < MINUTE_MS) return 'just now';
+  if (diffMs < HOUR_MS) return pluralUnit(Math.floor(diffMs / MINUTE_MS), 'minute');
+  if (diffMs < DAY_MS) return pluralUnit(Math.floor(diffMs / HOUR_MS), 'hour');
+  if (diffMs < WEEK_MS) return pluralUnit(Math.floor(diffMs / DAY_MS), 'day');
+  return pluralUnit(Math.floor(diffMs / WEEK_MS), 'week');
+}
+
+function pluralUnit(count: number, unit: string): string {
+  return `${count} ${unit}${count === 1 ? '' : 's'} ago`;
+}

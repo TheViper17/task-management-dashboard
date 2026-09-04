@@ -34,18 +34,16 @@ export const routes: Routes = [
         data: { title: 'Calendar', icon: 'calendar_today' },
       },
       {
-        // TODO(later phase): charts + activity feed.
         path: 'analytics',
         loadComponent: () =>
-          import('./shared/ui/placeholder-page/placeholder-page').then((m) => m.PlaceholderPage),
-        data: { title: 'Analytics', icon: 'bar_chart' },
+          import('./features/analytics/pages/analytics-page/analytics-page').then(
+            (m) => m.AnalyticsPage,
+          ),
       },
       {
-        // TODO(later phase): user directory.
         path: 'team',
         loadComponent: () =>
-          import('./shared/ui/placeholder-page/placeholder-page').then((m) => m.PlaceholderPage),
-        data: { title: 'Team', icon: 'group' },
+          import('./features/team/pages/team-page/team-page').then((m) => m.TeamPage),
       },
       {
         // Out of scope per the brief — kept so the sidebar link doesn't 404.

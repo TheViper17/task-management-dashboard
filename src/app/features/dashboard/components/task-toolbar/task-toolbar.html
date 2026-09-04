@@ -1,0 +1,38 @@
+<div class="task-toolbar">
+  <mat-button-toggle-group
+    class="task-toolbar__status"
+    [value]="activeStatus()"
+    (change)="onStatusChange($event)"
+    aria-label="Filter by status"
+  >
+    <mat-button-toggle value="all">All</mat-button-toggle>
+    <mat-button-toggle value="todo">To Do</mat-button-toggle>
+    <mat-button-toggle value="in_progress">In Progress</mat-button-toggle>
+    <mat-button-toggle value="done">Done</mat-button-toggle>
+  </mat-button-toggle-group>
+
+  <div class="task-toolbar__actions">
+    <button type="button" mat-stroked-button [matMenuTriggerFor]="priorityMenu">
+      {{ priorityLabel() }}
+      <mat-icon aria-hidden="true">arrow_drop_down</mat-icon>
+    </button>
+    <mat-menu #priorityMenu="matMenu">
+      <button type="button" mat-menu-item (click)="priorityChange.emit('all')">
+        All Priorities
+      </button>
+      <button type="button" mat-menu-item (click)="priorityChange.emit('high')">High</button>
+      <button type="button" mat-menu-item (click)="priorityChange.emit('medium')">Medium</button>
+      <button type="button" mat-menu-item (click)="priorityChange.emit('low')">Low</button>
+    </mat-menu>
+
+    <button
+      type="button"
+      mat-flat-button
+      class="task-toolbar__new-task"
+      (click)="newTaskClick.emit()"
+    >
+      <mat-icon aria-hidden="true">add</mat-icon>
+      New Task
+    </button>
+  </div>
+</div>

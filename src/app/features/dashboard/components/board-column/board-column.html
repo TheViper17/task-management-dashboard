@@ -1,0 +1,14 @@
+<section class="board-column" [attr.aria-label]="title + ' column'">
+  <header class="board-column__header">
+    <h2>{{ title() }}</h2>
+    <span class="board-column__count">{{ tasks().length }}</span>
+  </header>
+
+  <div class="board-column__list">
+    @for (task of tasks(); track task.id) {
+      <app-task-card [task]="task" (edit)="taskEdit.emit(task)" (delete)="taskDelete.emit(task)" />
+    } @empty {
+      <p class="board-column__empty">No tasks here.</p>
+    }
+  </div>
+</section>

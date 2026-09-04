@@ -1,0 +1,43 @@
+<article class="task-card" [class]="accentClass()" [class.task-card--pending]="isPending()">
+  <div class="task-card__top">
+    <app-priority-badge [priority]="task().priority" />
+    <button
+      type="button"
+      mat-icon-button
+      class="task-card__menu-trigger"
+      [matMenuTriggerFor]="menu"
+      [disabled]="isPending()"
+      [attr.aria-label]="'More actions for ' + task().title"
+    >
+      <mat-icon aria-hidden="true">more_vert</mat-icon>
+    </button>
+    <mat-menu #menu="matMenu">
+      <button type="button" mat-menu-item (click)="edit.emit()">
+        <mat-icon aria-hidden="true">edit</mat-icon>
+        Edit
+      </button>
+      <button type="button" mat-menu-item (click)="delete.emit()">
+        <mat-icon aria-hidden="true">delete</mat-icon>
+        Delete
+      </button>
+    </mat-menu>
+  </div>
+
+  <h3 class="task-card__title">{{ task().title }}</h3>
+  <p class="task-card__description">{{ task().description }}</p>
+
+  <app-due-date-chip
+    [dueDate]="task().dueDate"
+    [status]="task().status"
+    [completedAt]="task().completedAt"
+  />
+
+  @if (tag(); as tag) {
+    <p class="task-card__tag">{{ tag }}</p>
+  }
+
+  <div class="task-card__footer">
+    <app-avatar [initials]="task().assignee.avatar" [size]="24" />
+    <span>&#64;{{ task().assignee.name.split(' ')[0] }}</span>
+  </div>
+</article>

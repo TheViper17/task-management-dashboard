@@ -1,0 +1,10 @@
+<article class="stat-card">
+  <div class="stat-card__header">
+    <span class="stat-card__icon" aria-hidden="true">{{ statistic().icon }}</span>
+    <span class="stat-card__title">{{ statistic().title }}</span>
+  </div>
+  <p class="stat-card__value">{{ statistic().value }}</p>
+  <p class="stat-card__delta" [class]="'stat-card__delta--' + statistic().changeType">
+    {{ deltaText() }}
+  </p>
+</article>

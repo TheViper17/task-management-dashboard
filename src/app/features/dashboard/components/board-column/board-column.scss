@@ -37,11 +37,11 @@
   min-height: 40px; // so an empty column is still a valid drop target
 }
 
-// No cursor styling here anymore — CdkDropList's list items no longer carry
-// the drag cursor, .task-card__handle (task-card.scss) does, since it's the
-// only region that's actually an active drag handle now. Selectors here
-// can't reach that class anyway — it's inside TaskCard's own encapsulated
-// template, past the app-task-card host this stylesheet's scope stops at.
+// No cursor styling here anymore — .task-card__handle (task-card.scss)
+// carries the drag cursor now, since it's the only region that's an
+// actual drag handle. Selectors here couldn't reach that class anyway —
+// it's inside TaskCard's own template, past where this stylesheet's
+// scope stops.
 
 .board-column__empty {
   margin: 0;

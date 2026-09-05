@@ -9,18 +9,16 @@ const SEED_COUNT = 10;
 
 /**
  * Recent-activity feed. The mock API has no activity collection, so this
- * store synthesises one:
+ * fakes one: `seedIfEmpty()` backfills it from the most recently updated
+ * tasks on first load (TaskStore calls this once, after its own initial
+ * fetch resolves), and `record()` appends an entry every time TaskStore
+ * finishes a create/update/move/delete after that.
  *
- *  - On first load, `seedIfEmpty()` backfills the feed from the most
- *    recently updated tasks (called once by `TaskStore` after its initial
- *    fetch resolves).
- *  - From then on, `record()` appends an entry every time `TaskStore`
- *    completes a create/update/move/delete.
- *
- * Entries persist to `localStorage` so the feed survives a refresh; reads
- * and writes are wrapped in try/catch because storage can be unavailable
- * (private browsing, quota, disabled by policy) without that being a reason
- * for the feed to stop working for the rest of the session.
+ * Entries persist to localStorage so the feed survives a refresh. Reads
+ * and writes are wrapped in try/catch because storage isn't always
+ * available (private browsing, quota, disabled by policy) — that
+ * shouldn't be a reason for the feed to stop working for the rest of the
+ * session.
  */
 @Injectable({ providedIn: 'root' })
 export class ActivityStore {
@@ -31,11 +29,10 @@ export class ActivityStore {
   seedIfEmpty(tasks: readonly Task[]): void {
     if (this._entries().length > 0 || tasks.length === 0) return;
 
-    // Defensive, not just because TaskApiService now always stamps
-    // createdAt/updatedAt on write (found live: a task persisted before that
-    // fix — or written by anything else that skips it — has neither field,
-    // and `undefined.localeCompare()` used to crash this sort outright,
-    // taking the activity feed and this effect down with it).
+    // Defensive on purpose: a task without updatedAt (from before
+    // TaskApiService started stamping it, or from anything else that
+    // skips it) used to make this sort crash outright on
+    // undefined.localeCompare(), taking the whole activity feed with it.
     const seeded = [...tasks]
       .sort((a, b) => (b.updatedAt ?? '').localeCompare(a.updatedAt ?? ''))
       .slice(0, SEED_COUNT)

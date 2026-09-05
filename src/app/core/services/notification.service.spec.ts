@@ -2,9 +2,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { TestBed } from '@angular/core/testing';
 import { NotificationService } from './notification.service';
 
-// A plain object, not an `expect.objectContaining()` matcher itself — this
-// gets *spread into* each test's own objectContaining() below, so it needs
-// real enumerable properties to spread, not a matcher's internal shape.
+// Plain object, not a matcher — gets spread into each test's own
+// objectContaining() below, so it needs real properties to spread.
 const BOTTOM_CENTER = {
   horizontalPosition: 'center',
   verticalPosition: 'bottom',

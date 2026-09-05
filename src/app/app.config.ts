@@ -21,14 +21,13 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
 
-    // Explicit even though Angular 22 defaults to zoneless when zone.js
-    // isn't installed — states the intent rather than relying on an absence.
+    // Angular 22 is zoneless by default without zone.js anyway — stated
+    // explicitly so the intent is clear, not just implied.
     provideZonelessChangeDetection(),
 
-    // Forces TranslationService to construct here, before the root
-    // component (and everything under it, including the first Angular CDK
-    // component to ever ask for `Directionality`) — see its class doc
-    // comment for why `document.dir` must already be correct by then.
+    // Builds TranslationService here, before the root component — and
+    // before the first CDK component ever asks for Directionality. See
+    // its class comment for why document.dir needs to be right by then.
     provideAppInitializer(() => {
       inject(TranslationService);
     }),
@@ -40,20 +39,19 @@ export const appConfig: ApplicationConfig = {
       // withPreloading(...) is added in Phase 4 once feature routes exist to preload.
     ),
 
-    // Interceptor order is deliberate — see the JSDoc on each interceptor:
+    // Order matters here — see each interceptor's own comment for why:
     //   cache (outermost, short-circuits on a hit)
-    //   -> error (maps failures to AppError, notifies)
-    //   -> retry (innermost, retries the *raw* HttpErrorResponse before it's mapped)
+    //   -> error (maps failures to AppError, shows a toast)
+    //   -> retry (innermost, retries the raw HttpErrorResponse before it's mapped)
     provideHttpClient(withInterceptors([cacheInterceptor, errorInterceptor, retryInterceptor])),
 
     { provide: API_BASE_URL, useValue: '/api' },
     { provide: CACHE_TTL_MS, useValue: CACHE_TTL_DEFAULT_MS },
 
-    // provideCharts(withDefaultRegisterables()) is intentionally NOT here —
-    // it's scoped to AnalyticsPage's own component providers instead. Chart.js
-    // is a genuinely heavy dependency; providing it at the root pulls it into
-    // the eager bundle even though every chart-using component is behind a
-    // lazy route, blowing the production budget by ~180kB for a chart no one
-    // may ever look at. See analytics-page.ts.
+    // provideCharts(withDefaultRegisterables()) isn't here on purpose — it
+    // lives on AnalyticsPage's own providers instead. Chart.js is heavy,
+    // and providing it at the root would pull it into the eager bundle
+    // even though every chart is behind a lazy route — blew the budget by
+    // ~180kB for a chart someone might never open. See analytics-page.ts.
   ],
 };

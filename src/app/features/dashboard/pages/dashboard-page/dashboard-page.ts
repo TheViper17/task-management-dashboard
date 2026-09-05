@@ -21,13 +21,13 @@ import { boardColumnListId, computeTaskOrderPatches } from '../../utils/board-dr
 const BOARD_STATUSES: readonly TaskStatus[] = ['todo', 'in_progress', 'done'];
 
 /**
- * The dashboard screen: stat cards, filter/search toolbar, and the 3-column
- * board. The only "smart" component in this feature — it injects the
- * stores and MatDialog, and every child below it is presentational.
+ * The dashboard screen: stat cards, filter/search toolbar, and the
+ * 3-column board. The only "smart" component in this feature — it
+ * injects the stores and MatDialog, everything below it is presentational.
  *
- * Create/edit is delegated to `TaskDialogService`, which owns the full
- * open-dialog-then-persist flow — the same service the sidebar's "New Task"
- * button uses (see Shell), so every entry point behaves identically.
+ * Create/edit is delegated to TaskDialogService, which owns the full
+ * open-dialog-then-persist flow — the same service the sidebar's "New
+ * Task" button uses (see Shell), so every entry point behaves the same.
  */
 @Component({
   selector: 'app-dashboard-page',
@@ -60,8 +60,8 @@ export class DashboardPage {
   );
 
   /**
-   * True only for the *first* load (no tasks yet) — a later `reload()`
-   * setting `isLoading` again shouldn't blank an already-populated board
+   * True only for the first load (no tasks yet) — a later reload()
+   * setting isLoading again shouldn't blank an already-populated board
    * back to skeletons.
    */
   protected readonly isInitialLoading = computed(
@@ -114,11 +114,11 @@ export class DashboardPage {
   }
 
   /**
-   * Drag-and-drop between/within columns. `BoardColumn` forwards the raw
-   * CDK event unchanged because a cross-column move needs both columns'
-   * current order at once, which no single `BoardColumn` instance has.
-   * The actual reorder math lives in `computeTaskOrderPatches` — a pure
-   * function, tested directly — this just applies whatever it returns.
+   * Drag-and-drop between/within columns. BoardColumn forwards the raw
+   * CDK event unchanged, since a cross-column move needs both columns'
+   * current order at once, which no single BoardColumn instance has. The
+   * actual reorder math lives in computeTaskOrderPatches — tested
+   * directly — this just applies whatever it returns.
    */
   protected onTaskMoved(event: CdkDragDrop<readonly Task[]>): void {
     for (const patch of computeTaskOrderPatches(event)) {

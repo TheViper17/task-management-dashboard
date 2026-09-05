@@ -5,11 +5,10 @@ import type { TranslationKey } from '../../../core/i18n/translations/en';
 
 /**
  * Stand-in for a route that isn't built yet. Bound entirely via route
- * `data` + `withComponentInputBinding()` in `app.routes.ts` — no per-route
- * wrapper component needed for `titleKey`/`subtitleKey`/`icon`.
- * `title`/`subtitle` are translation *keys*, not display text — route
- * `data` can't itself call `TranslationService`, so the key is resolved
- * here, in the one place that can.
+ * data + withComponentInputBinding() in app.routes.ts — no wrapper
+ * component needed per route for titleKey/subtitleKey/icon. These are
+ * translation keys, not display text — route data can't call
+ * TranslationService itself, so the key gets resolved here instead.
  */
 @Component({
   selector: 'app-placeholder-page',

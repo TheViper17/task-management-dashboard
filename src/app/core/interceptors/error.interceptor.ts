@@ -6,14 +6,12 @@ import { NotificationService } from '../services/notification.service';
 import { toAppError } from '../utils/error.utils';
 
 /**
- * Normalises every failed request into an `AppError` (see error.utils.ts),
- * surfaces it to the user via a snackbar, and rethrows the `AppError` so
- * callers (stores) can still branch on `kind` — e.g. to roll back an
- * optimistic update.
+ * Turns any failed request into an AppError (see error.utils.ts), shows a
+ * toast, and rethrows it so stores can still check `kind` and roll back an
+ * optimistic update if they need to.
  *
- * Placed after `retryInterceptor` in `withInterceptors([...])` so retries
- * happen against the raw `HttpErrorResponse` first; this interceptor only
- * runs once retries are exhausted (or the error wasn't retryable).
+ * Runs after retryInterceptor, so retries happen first against the raw
+ * error — this only fires once retries are exhausted or don't apply.
  */
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   const notify = inject(NotificationService);
@@ -22,9 +20,9 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   return next(req).pipe(
     catchError((error: unknown) => {
       const appError = toAppError(error);
-      // `messageKey` is set only for this app's own static fallback text;
-      // a message the server actually sent (e.g. a validation error) has
-      // no key to translate it by and is shown exactly as received.
+      // messageKey only exists for our own fallback text — a message the
+      // server actually sent has nothing to translate it against, so it
+      // gets shown exactly as it came in.
       const message = appError.messageKey ? i18n.translate(appError.messageKey) : appError.message;
       notify.showError(message);
       return throwError(() => appError);

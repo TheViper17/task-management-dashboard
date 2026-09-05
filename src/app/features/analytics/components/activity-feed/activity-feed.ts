@@ -15,11 +15,11 @@ const META: Record<ActivityType, { icon: string; verbKey: TranslationKey }> = {
 };
 
 /**
- * Recent-activity list — icon, "{verb phrase} {task}", relative time.
- * The verb phrase carries its own subject ("You created", not "You" +
- * "created" concatenated) — Arabic conjugates the verb for person, so
- * splitting a bare "You" out as a separate word doesn't translate
- * naturally the way it does in English.
+ * Recent-activity list — icon, "{verb phrase} {task}", relative time. The
+ * verb phrase carries its own subject ("You created", not "You" +
+ * "created" glued together) — Arabic conjugates the verb for person, so a
+ * separate bare "You" wouldn't translate naturally the way it does in
+ * English.
  */
 @Component({
   selector: 'app-activity-feed',

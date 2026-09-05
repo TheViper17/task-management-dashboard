@@ -10,11 +10,11 @@ import { boardColumnListId } from '../../utils/board-drag-drop.utils';
 
 /**
  * One kanban column (To Do / In Progress / Done) — header, count badge,
- * cards. Drag-and-drop (the brief's optional "would be awesome" feature):
- * this column is a `cdkDropList`; it emits the raw `CdkDragDrop` event
- * unchanged — `DashboardPage` owns the reordering math because a
- * cross-column move needs to see *both* columns involved, which a single
- * `BoardColumn` never can.
+ * cards. This is a cdkDropList for drag-and-drop (the brief's optional
+ * "would be awesome" feature), and it emits the raw CdkDragDrop event
+ * unchanged. DashboardPage owns the actual reordering math, since a
+ * cross-column move needs to see both columns, which one BoardColumn
+ * never can.
  */
 @Component({
   selector: 'app-board-column',

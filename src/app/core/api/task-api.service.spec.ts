@@ -31,8 +31,8 @@ describe('TaskApiService', () => {
   let httpMock: HttpTestingController;
 
   beforeEach(() => {
-    // Fixed clock so create()/update()'s stamped createdAt/updatedAt are
-    // asserted exactly, not just "some string".
+    // Fixed clock so the stamped createdAt/updatedAt can be asserted
+    // exactly instead of just "some string".
     vi.useFakeTimers({ toFake: ['Date'] });
     vi.setSystemTime(new Date('2026-09-04T12:00:00.000Z'));
 
@@ -71,10 +71,9 @@ describe('TaskApiService', () => {
   });
 
   it('create() POSTs the DTO to /api/tasks, stamped with fresh createdAt/updatedAt', () => {
-    // json-server has no insert trigger — a bare POST of the DTO alone would
-    // persist a task with neither field at all. Found live: creating a task,
-    // then reloading, crashed ActivityStore.seedIfEmpty's
-    // `updatedAt.localeCompare()` sort on the very next fresh load.
+    // json-server has no insert trigger, so a bare POST of the DTO alone
+    // would leave both fields missing. Found this live — creating a task
+    // and reloading crashed ActivityStore.seedIfEmpty's sort.
     const dto: CreateTaskDto = {
       title: 'New task',
       description: 'desc',
@@ -98,9 +97,9 @@ describe('TaskApiService', () => {
   });
 
   it('create() embeds the resolved assignee in the POST body when one is given', () => {
-    // json-server has no relational join — a bare POST would persist a task
-    // with assigneeId and no embedded assignee at all, which every card
-    // template reads. The caller (TaskStore) resolves it; this just forwards it.
+    // json-server can't do relational joins, so a bare POST would leave
+    // the task with no embedded assignee — the caller (TaskStore) resolves
+    // it, this just forwards it along.
     const dto: CreateTaskDto = {
       title: 'New task',
       description: 'desc',
@@ -131,9 +130,9 @@ describe('TaskApiService', () => {
   });
 
   it('update() PATCHes the partial DTO to /api/tasks/:id, stamped with a fresh updatedAt', () => {
-    // Without this, a PATCH only overwrites the fields it sends — updatedAt
-    // would silently go stale after every real edit (including
-    // drag-and-drop moves, which share this method via TaskStore.move()).
+    // A PATCH only overwrites the fields it sends, so without this,
+    // updatedAt would go stale after every real edit — including
+    // drag-and-drop moves, which use this same method via TaskStore.move().
     const patch = { status: 'in_progress' as const };
     const updated = makeTask({ status: 'in_progress' });
     service.update('task-1', patch).subscribe((task) => expect(task).toEqual(updated));

@@ -10,11 +10,11 @@ import type {
 import { generateOptimisticId } from './id.utils';
 
 /**
- * Whether a task is overdue *right now*, recomputed rather than trusted from
- * the API. The mock dataset seeds `isOverdue` at generation time; by the
- * time a reviewer opens the app "today" has moved on, so the seeded value
- * can be wrong. Deriving it here means the UI is always correct regardless
- * of when it's viewed.
+ * Whether a task is overdue right now, recomputed rather than trusted
+ * from the API. The mock dataset seeds isOverdue at generation time, so
+ * by the time anyone opens the app "today" has moved on and the seeded
+ * value can be wrong. Deriving it here keeps the UI correct no matter
+ * when it's viewed.
  */
 export function isTaskOverdue(task: Pick<Task, 'dueDate' | 'status'>): boolean {
   if (task.status === 'done') return false;
@@ -101,12 +101,12 @@ export function deriveTaskCounts(tasks: readonly Task[]): TaskCounts {
 }
 
 /**
- * Builds the placeholder `Task` shown immediately after a user submits the
- * create form, before the server has responded. `TaskStore.create()` inserts
- * this, then swaps it for the real record (or removes it on failure).
+ * Builds the placeholder Task shown right after a user submits the create
+ * form, before the server responds. TaskStore.create() inserts this, then
+ * swaps it for the real record, or removes it if the request fails.
  *
- * `order` places the card last in its target column, consistent with where
- * a genuinely new task would land.
+ * order places the card last in its target column, same as where a
+ * genuinely new task would actually land.
  */
 export function createOptimisticTask(
   dto: CreateTaskDto,
@@ -133,8 +133,8 @@ export function createOptimisticTask(
 
 /**
  * Merges a patch into a task for optimistic local updates, recomputing
- * `isOverdue` and `updatedAt` from the merged result so a status/due-date
- * change is reflected immediately, before the server confirms it.
+ * isOverdue and updatedAt from the result so a status/due-date change
+ * shows up immediately, before the server confirms it.
  */
 export function applyTaskPatch(task: Task, patch: TaskPatch): Task {
   const merged: Task = { ...task, ...patch, updatedAt: new Date().toISOString() };

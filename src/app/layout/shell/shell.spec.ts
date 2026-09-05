@@ -93,12 +93,12 @@ describe('Shell', () => {
 
   describe('responsive drawer', () => {
     it('toggles the drawer when the header requests it, on handset', async () => {
-      // The header menu button's own visibility is a real CSS media query
-      // matched against the actual viewport (verified separately in a real
-      // browser — jsdom doesn't evaluate media queries the same way, so
-      // querying for the button here would test jsdom's CSS engine, not our
-      // code). This calls the same method the button's (click) is bound to,
-      // to test the actual toggle behaviour the wiring exists for.
+      // The header menu button's visibility is a real CSS media query
+      // against the actual viewport, checked separately in a real browser
+      // — jsdom doesn't evaluate media queries the same way, so querying
+      // for the button here would test jsdom's CSS engine, not our code.
+      // This calls the same method the button's (click) is bound to, to
+      // test the actual toggle behaviour instead.
       const { fixture } = await setup({ isHandset: true });
 
       // The drawer starts closed on handset ([opened]="!isHandset()").

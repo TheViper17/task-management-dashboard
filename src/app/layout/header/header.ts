@@ -10,11 +10,11 @@ import { Avatar } from '../../shared/ui/avatar/avatar';
 
 /**
  * Global top bar: brand, search, notifications, language switcher,
- * current-user avatar. Purely presentational except for the language
- * switcher, which talks to `TranslationService` directly rather than
- * round-tripping through `Shell` via an output — unlike search (whose
- * debounce genuinely belongs to whoever owns the search state) there's no
- * shared state here for a parent to own; `TranslationService` already is
+ * current-user avatar. Mostly presentational, except the language
+ * switcher — it talks to TranslationService directly instead of
+ * round-tripping through Shell via an output. Unlike search (whose
+ * debounce genuinely belongs to whoever owns that state), there's no
+ * shared state here for a parent to own; TranslationService is already
  * the single source of truth, app-wide.
  */
 @Component({

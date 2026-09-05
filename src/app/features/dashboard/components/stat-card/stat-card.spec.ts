@@ -36,9 +36,9 @@ describe('StatCard', () => {
   });
 
   it('falls back to the raw title/changeLabel text for an id it does not recognise', async () => {
-    // title/changeLabel are free-text from the (mock) statistics API, not
-    // this app's own template — an id outside the known four should
-    // degrade to whatever the "backend" sent, not blank out.
+    // title/changeLabel are free text from the (mock) statistics API, not
+    // this app's own template — an id outside the known four should fall
+    // back to whatever the "backend" sent, not blank out.
     await render(StatCard, {
       inputs: {
         statistic: makeStatistic({

@@ -7,17 +7,13 @@ const MAX_RETRIES = 2;
 const BASE_DELAY_MS = 300;
 
 /**
- * Retries a failed **read** (GET) up to `MAX_RETRIES` times with exponential
- * backoff (300ms, 600ms), but only for transient failures: network errors
- * (`status === 0`) and server errors (`5xx`). A `4xx` is a client mistake
- * that won't succeed on retry, so it's rethrown immediately.
+ * Retries GETs on network errors or 5xx, with backoff (300ms, 600ms). Skips
+ * 4xx since retrying won't fix a bad request, and never retries writes —
+ * don't want to risk double-submitting something non-idempotent.
  *
- * Writes (POST/PATCH/DELETE) are never retried automatically — retrying a
- * non-idempotent request risks double-submitting it.
- *
- * Placed innermost in `withInterceptors([...])`, closest to the backend, so
- * it retries the *raw* `HttpErrorResponse` before `errorInterceptor` maps it
- * to a user-facing `AppError`.
+ * Sits innermost in the interceptor chain, right next to the backend, so
+ * it sees the raw HttpErrorResponse before errorInterceptor turns it into
+ * an AppError.
  */
 export const retryInterceptor: HttpInterceptorFn = (req, next) => {
   if (req.method !== 'GET') return next(req);

@@ -5,11 +5,11 @@ import { describeDueDate } from '../../../core/utils/date.utils';
 import type { TaskStatus } from '../../../core/models/task.model';
 
 /**
- * Renders a task's due-date state exactly as the board cards need it:
+ * Renders a task's due-date state the way the board cards need it:
  * "Overdue by N days" (red), "Due today/tomorrow/in N days" (muted), or
  * "Completed today/yesterday" (green). All the date math lives in
- * `describeDueDate` (core/utils/date.utils) — this component only resolves
- * the resulting translation key to text and renders it.
+ * describeDueDate (core/utils/date.utils) — this just resolves the
+ * resulting translation key to text and renders it.
  */
 @Component({
   selector: 'app-due-date-chip',

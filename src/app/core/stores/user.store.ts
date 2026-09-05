@@ -4,9 +4,9 @@ import type { Assignee } from '../models/task.model';
 import { API_BASE_URL } from '../tokens/api.tokens';
 
 /**
- * Read-only directory of assignees, backed by `httpResource`. Used to
- * populate the assignee dropdown (forms, filters) and to resolve an
- * `assigneeId` to a display-ready `Assignee` for optimistic task cards.
+ * Read-only directory of assignees, backed by httpResource. Feeds the
+ * assignee dropdowns (forms, filters) and resolves an assigneeId to a
+ * real Assignee for optimistic task cards.
  */
 @Injectable({ providedIn: 'root' })
 export class UserStore {

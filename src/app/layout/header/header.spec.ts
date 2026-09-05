@@ -59,10 +59,9 @@ describe('Header', () => {
     });
 
     it('switches to Arabic via TranslationService when العربية is chosen', async () => {
-      // TranslationService.setLocale() reloads the page (see its own doc
-      // comment) — mocked out here so the test verifies the *call*, not a
-      // real navigation, matching how translation.service.spec.ts already
-      // covers the reload behaviour itself in isolation.
+      // TranslationService.setLocale() reloads the page — mocked out
+      // here so this test checks the call, not a real navigation. The
+      // reload itself is already covered in translation.service.spec.ts.
       const setLocaleSpy = vi
         .spyOn(TranslationService.prototype, 'setLocale')
         .mockImplementation(() => undefined);

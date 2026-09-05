@@ -8,22 +8,19 @@ const STORAGE_KEY = 'task-dashboard:locale';
 const RTL_LOCALES: ReadonlySet<Locale> = new Set(['ar']);
 
 /**
- * Runtime translation + locale service. See translation.model.ts's doc
- * comment for why this is a small custom service rather than
- * `@angular/localize`.
+ * Runtime translation + locale service. See translation.model.ts for why
+ * this is a small custom service instead of @angular/localize.
  *
- * `setLocale()` reloads the page. That's deliberate, not a shortcut: Angular
- * CDK's `Directionality` (which every overlay-based Material component —
- * `mat-menu`, `mat-select`, `mat-datepicker`, `mat-sidenav` — reads to
- * decide which side it opens/anchors from) resolves `document.dir` exactly
- * once, at its own construction, and has no built-in mechanism to
- * re-mirror components that already exist. Mutating `document.dir` after
- * the app has booted would flip this app's own layout (which reads `dir`
- * live via logical CSS properties) but leave every Material overlay
- * pointing the wrong way. A reload is the standard fix production Angular
- * apps use for exactly this — and it guarantees `Directionality`, along
- * with the datepicker's own locale (see TaskForm), is correct from the
- * very first paint, not patched up after.
+ * setLocale() reloads the page, and that's deliberate. Angular CDK's
+ * Directionality — what mat-menu, mat-select, mat-datepicker, and
+ * mat-sidenav all read to decide which side to open or anchor from —
+ * resolves document.dir once, at construction, with no way to re-mirror
+ * components that already exist. Mutating document.dir after boot would
+ * flip this app's own layout (which reads dir live) but leave every
+ * Material overlay pointing the wrong way. A reload is the standard fix
+ * for that, and it also means Directionality and the datepicker's locale
+ * (see TaskForm) are correct from the first paint instead of patched up
+ * after.
  */
 @Injectable({ providedIn: 'root' })
 export class TranslationService {
@@ -34,10 +31,10 @@ export class TranslationService {
   readonly dir = computed(() => (RTL_LOCALES.has(this._locale()) ? 'rtl' : 'ltr'));
 
   constructor() {
-    // Synchronous, not an effect() — must be applied before any component
-    // (in particular, before Angular CDK constructs its `Directionality`
-    // singleton) reads `document.documentElement.dir`. Forced to run this
-    // early via a `provideAppInitializer` in app.config.ts.
+    // Synchronous, not an effect() — has to run before any component (and
+    // especially before CDK builds its Directionality singleton) reads
+    // document.documentElement.dir. Forced early via a
+    // provideAppInitializer in app.config.ts.
     this.applyToDocument(this._locale());
   }
 
@@ -49,21 +46,19 @@ export class TranslationService {
   }
 
   /**
-   * Resolves `key` in the current locale (falling back to English if the
-   * key is somehow missing there — it never should be, `ar.ts` is typed to
-   * cover every English key), then interpolates `{param}` placeholders from
-   * `params`.
+   * Resolves key in the current locale (falling back to English if it's
+   * somehow missing there — shouldn't happen, ar.ts is typed to cover
+   * every English key), then fills in any {param} placeholders.
    *
-   * `key`'s type only guarantees a real key at compile time — a route's
-   * `data`, or anything else built from a plain string at runtime, can
-   * still hand this an unrecognised one (found live: a stale route-data
-   * field name did exactly that). `entry` falling through both lookups
-   * returns the raw key itself, a visible "this string is missing" marker
-   * a developer can spot immediately, rather than a crash mid-render.
+   * key only has to be a real key at compile time — a route's data, or
+   * anything else built from a plain string at runtime, can still hand
+   * this something unrecognised (a stale route-data field name did
+   * exactly that once). If both lookups come up empty, this just returns
+   * the key itself — a visible "this string is missing" marker instead of
+   * a crash.
    *
-   * A `count` in `params` selects the grammatically correct plural form via
-   * `Intl.PluralRules` for entries that have one (rather than a hand-rolled
-   * `count === 1` check, which can't express Arabic's dual/few/many).
+   * A count in params picks the right plural form via Intl.PluralRules,
+   * for entries that have one.
    */
   translate(key: TranslationKey, params?: TranslateParams): string {
     const locale = this._locale();

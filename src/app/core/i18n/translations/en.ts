@@ -1,10 +1,10 @@
 import type { TranslationDictionary } from '../translation.model';
 
 /**
- * English — the primary language and the source of truth for the app's
- * translation key set. `ar.ts` is typed against `keyof typeof en`, so
- * adding a key here without adding it there is a compile error, not a
- * silently-missing Arabic string discovered at runtime.
+ * English — the primary language, and the source of truth for the key
+ * set. ar.ts is typed against keyof typeof en, so adding a key here
+ * without adding it there is a compile error, not a silently-missing
+ * Arabic string found at runtime.
  */
 export const en = {
   'app.title': 'Task Manager',

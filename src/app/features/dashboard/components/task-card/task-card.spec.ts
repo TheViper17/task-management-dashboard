@@ -24,8 +24,8 @@ function makeTask(overrides: Partial<Task> = {}): Task {
 
 describe('TaskCard', () => {
   beforeEach(() => {
-    // Fake only Date, not setTimeout/etc — Material's CDK Overlay (the menu
-    // in the interaction tests below) needs real timers to actually open.
+    // Fake only Date, not setTimeout/etc — Material's CDK Overlay (the
+    // menu in the tests below) needs real timers to actually open.
     vi.useFakeTimers({ toFake: ['Date'] });
     vi.setSystemTime(new Date('2026-09-04T12:00:00.000Z'));
   });
@@ -103,12 +103,12 @@ describe('TaskCard', () => {
   });
 
   it('falls back to "Unassigned" and a "?" avatar instead of crashing when assignee is missing', async () => {
-    // Reproduces the real-world shape the mock backend used to echo back
-    // before TaskStore started overlaying the resolved assignee — this is
-    // the exact template access that used to throw
-    // "Cannot read properties of undefined (reading 'avatar')" and take
-    // down the whole render pass. Cast is deliberate: Task#assignee is
-    // typed as required, but must never be trusted as actually present.
+    // Reproduces the shape the mock backend used to echo back before
+    // TaskStore started overlaying the resolved assignee — this is the
+    // exact template access that used to throw "Cannot read properties of
+    // undefined (reading 'avatar')" and take down the whole render. The
+    // cast is intentional: Task#assignee is typed as required, but should
+    // never actually be trusted.
     const task = { ...makeTask(), assignee: undefined } as unknown as Task;
     await render(TaskCard, { inputs: { task } });
 
@@ -117,11 +117,11 @@ describe('TaskCard', () => {
   });
 
   it("opens and stays open when the actions menu is clicked (not swallowed by the card's drag handle)", async () => {
-    // Regression test for the menu-open-then-instant-close glitch: cdkDrag's
-    // own pointer tracking on the whole card host was racing the menu
-    // overlay's open. Scoping the drag handle away from the actions row
-    // (see task-card.html) fixed it — this asserts the menu is still open
-    // well after the ~300ms window the original bug closed it within.
+    // Regression test for the menu-open-then-instant-close glitch —
+    // cdkDrag's pointer tracking on the whole card host was racing the
+    // menu overlay's open. Scoping the drag handle away from the actions
+    // row (see task-card.html) fixed it; this checks the menu is still
+    // open well past the ~300ms window the bug used to close it within.
     const user = userEvent.setup();
     await render(TaskCard, { inputs: { task: makeTask() } });
 
@@ -129,7 +129,7 @@ describe('TaskCard', () => {
     const menuItem = await screen.findByRole('menuitem', { name: /edit/i });
     expect(menuItem).toBeInTheDocument();
 
-    // Real timers here (only Date is faked in this suite — see beforeEach),
+    // Real timers here (only Date is faked in this suite, see beforeEach),
     // so this is an actual elapsed wait, not a simulated tick.
     await new Promise((resolve) => setTimeout(resolve, 300));
     expect(screen.getByRole('menuitem', { name: /edit/i })).toBeInTheDocument();
@@ -159,9 +159,9 @@ describe('TaskCard', () => {
       await user.type(input, 'Design the new homepage{enter}');
 
       // Commits by emitting the patch upward, not by rewriting its own
-      // `task` input — that's TaskStore's job once the PATCH round-trips
-      // (see DashboardPage.onQuickEditTask). Here, with `task` untouched,
-      // the card exits edit mode and simply displays the original title again.
+      // task input — that's TaskStore's job once the PATCH round-trips
+      // (see DashboardPage.onQuickEditTask). With task left untouched
+      // here, the card just exits edit mode and shows the original title.
       expect(emitted).toEqual([{ title: 'Design the new homepage' }]);
       expect(screen.queryByRole('textbox', { name: /title for/i })).not.toBeInTheDocument();
       expect(screen.getByText('Design homepage')).toBeInTheDocument();

@@ -1,10 +1,10 @@
 /**
  * Task domain models.
  *
- * String-literal unions are used instead of TypeScript `enum`s deliberately:
- * the mock API already speaks these exact lowercase strings, so a union
- * round-trips through JSON with zero mapping layer, produces no runtime
- * object (enums compile to one), and tree-shakes cleanly.
+ * String-literal unions instead of enums on purpose — the mock API
+ * already speaks these exact lowercase strings, so a union round-trips
+ * through JSON with no mapping layer, adds no runtime object (enums
+ * compile to one), and tree-shakes cleanly.
  */
 
 export type TaskStatus = 'todo' | 'in_progress' | 'done';
@@ -23,10 +23,10 @@ export interface Assignee {
 /**
  * A task as returned by the API.
  *
- * `isOverdue` is present on the wire, but callers should prefer the
- * `isTaskOverdue()` helper (see task.utils.ts) over trusting this field
- * directly — the mock dataset's seed values go stale the moment "today"
- * moves on, so the store recomputes it client-side on every read.
+ * isOverdue is on the wire, but callers should use the isTaskOverdue()
+ * helper (task.utils.ts) instead of trusting it directly — the seed
+ * data's values go stale the moment "today" moves on, so the store
+ * recomputes it client-side on every read.
  */
 export interface Task {
   id: string;
@@ -46,10 +46,11 @@ export interface Task {
 }
 
 /**
- * Fields a user supplies when creating a task. Deliberately a separate type
- * from `Task`: the entity carries server-owned fields (id, timestamps,
- * isOverdue, order) that a create payload must never set directly — keeping
- * them apart makes that a compile error instead of a code-review comment.
+ * Fields a user supplies when creating a task. Kept separate from Task on
+ * purpose — the entity carries server-owned fields (id, timestamps,
+ * isOverdue, order) a create payload should never set directly, and
+ * splitting the types makes that a compile error instead of something to
+ * catch in review.
  */
 export interface CreateTaskDto {
   title: string;
@@ -64,9 +65,9 @@ export interface CreateTaskDto {
 export type UpdateTaskDto = Partial<CreateTaskDto>;
 
 /**
- * The full set of fields the API will accept in a PATCH, wider than
- * `UpdateTaskDto`: it also allows `order` (board position), which is
- * store-owned and never exposed on the create/edit form.
+ * Every field the API will accept in a PATCH — wider than UpdateTaskDto,
+ * since it also allows order (board position), which is store-owned and
+ * never shown on the create/edit form.
  */
 export type TaskPatch = Partial<
   Pick<

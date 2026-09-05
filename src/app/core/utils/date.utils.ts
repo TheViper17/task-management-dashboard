@@ -4,12 +4,11 @@ import type { Task } from '../models/task.model';
 import { daysUntil } from './task.utils';
 
 /**
- * Converts a JS `Date` (as produced by `mat-datepicker`'s calendar, which
- * always constructs dates via `new Date(year, month, day)` in local time) to
- * the app's wire format, `"YYYY-MM-DD"`. Deliberately reads local
- * year/month/date getters rather than `date.toISOString().slice(0, 10)` —
- * `toISOString()` converts to UTC first, which would silently roll the date
- * back a day for anyone west of UTC.
+ * Converts a JS Date (the kind mat-datepicker's calendar produces, always
+ * via new Date(year, month, day) in local time) to this app's wire
+ * format, "YYYY-MM-DD". Reads local year/month/date getters rather than
+ * date.toISOString().slice(0, 10) — toISOString() converts to UTC first,
+ * which would quietly roll the date back a day for anyone west of UTC.
  */
 export function toIsoDateString(date: Date): string {
   const year = date.getFullYear();
@@ -19,11 +18,11 @@ export function toIsoDateString(date: Date): string {
 }
 
 /**
- * Parses the app's `"YYYY-MM-DD"` wire format into a local-midnight `Date`,
- * the inverse of `toIsoDateString()`. Deliberately not `new Date(iso)` —
- * that parses as UTC midnight per spec, which display code (this app's own
- * `Date`-based getters, and mat-datepicker's calendar) would then read back
- * as the previous day for anyone west of UTC.
+ * Parses the app's "YYYY-MM-DD" format into a local-midnight Date — the
+ * inverse of toIsoDateString(). Not new Date(iso), on purpose: that parses
+ * as UTC midnight per spec, which this app's own Date getters (and
+ * mat-datepicker's calendar) would then read back as the previous day for
+ * anyone west of UTC.
  */
 export function parseIsoDateLocal(iso: string): Date {
   const [year, month, day] = iso.split('-').map(Number);
@@ -33,11 +32,11 @@ export function parseIsoDateLocal(iso: string): Date {
 export type DueDateTone = 'overdue' | 'done' | 'default';
 
 /**
- * A translation key + params, not a formatted string — this file is plain,
- * framework-agnostic code (no `inject()`), independently unit-tested against
- * *which* message and *what* data, not against final English wording. The
- * caller (`DueDateChip`/`ActivityFeed`) resolves the actual text via
- * `i18n.translate(key, params)`, in whichever language is active.
+ * A translation key + params, not a formatted string — this file is
+ * plain, framework-agnostic code (no inject()), so it gets tested against
+ * which message and what data, not final English wording. The caller
+ * (DueDateChip/ActivityFeed) resolves the actual text via
+ * i18n.translate(key, params).
  */
 export interface DueDateInfo {
   icon: string;
@@ -48,8 +47,8 @@ export interface DueDateInfo {
 
 /**
  * Describes a task's due-date state for display — the logic behind
- * `DueDateChip`. Pulled out as a pure function so every branch (overdue,
- * due today/tomorrow/in N days, completed today/yesterday/earlier) is unit
+ * DueDateChip. Pulled out as a plain function so every branch (overdue,
+ * due today/tomorrow/in N days, completed today/yesterday/earlier) gets
  * tested without mounting a component.
  */
 export function describeDueDate(
@@ -95,8 +94,8 @@ export interface RelativeTimeInfo {
 
 /**
  * Describes an ISO datetime as "N minutes/hours/days/weeks ago" for the
- * activity feed. Takes `now` as a parameter (defaulting to `new Date()`)
- * purely so tests can pass a fixed instant instead of mocking the clock.
+ * activity feed. Takes now as a parameter (defaulting to new Date()) just
+ * so tests can pass a fixed instant instead of mocking the clock.
  */
 export function describeRelativeTime(iso: string, now: Date = new Date()): RelativeTimeInfo {
   const diffMs = Math.max(0, now.getTime() - new Date(iso).getTime());

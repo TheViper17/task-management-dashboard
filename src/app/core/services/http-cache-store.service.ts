@@ -7,10 +7,10 @@ interface CacheEntry {
 }
 
 /**
- * In-memory store backing `cacheInterceptor`. Pulled out into its own
- * injectable (rather than a module-level `Map` inside the interceptor) so
- * it can be unit-tested in isolation and reset between test runs — `root`
- * scope still gives the whole app exactly one instance.
+ * Plain in-memory store behind cacheInterceptor. It's its own injectable
+ * rather than a Map living inside the interceptor file so it can be tested
+ * on its own and reset between runs — root scope still keeps it a single
+ * shared instance across the app.
  */
 @Injectable({ providedIn: 'root' })
 export class HttpCacheStore {

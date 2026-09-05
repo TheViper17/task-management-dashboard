@@ -3,13 +3,12 @@ import type { MatSnackBarConfig } from '@angular/material/snack-bar';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 /**
- * Thin wrapper around `MatSnackBar` so the rest of the app depends on an
- * intent-revealing API (`showError` / `showSuccess` / `showWarning` /
- * `showInfo`) instead of Material's snackbar directly — swapping the toast
- * implementation later touches one file. Every toast opens bottom-centre
- * and is colour-coded by severity (see notification.service.scss, loaded
- * globally since a snackbar's overlay renders outside any component's view
- * encapsulation).
+ * Wraps MatSnackBar behind a plain showError/showSuccess/showWarning/
+ * showInfo API, so the rest of the app doesn't depend on Material's
+ * snackbar directly — swapping the toast library later only touches this
+ * file. Positioning and colour come from the global snackbar styles,
+ * loaded separately since a snackbar renders outside any component's own
+ * view.
  */
 @Injectable({ providedIn: 'root' })
 export class NotificationService {

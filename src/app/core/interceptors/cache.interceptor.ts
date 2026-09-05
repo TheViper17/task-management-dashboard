@@ -8,13 +8,13 @@ import { CACHE_TTL_MS } from '../tokens/api.tokens';
 import { resourceRootOf } from '../utils/url.utils';
 
 /**
- * Caches GET responses for `CACHE_TTL_MS` so re-visiting a screen (or two
- * stores requesting overlapping data) doesn't re-fetch instantly-stale data.
- * Any non-GET request invalidates every cached entry under that resource's
- * root, so a create/update/delete is always reflected on the next read.
+ * Caches GET responses for CACHE_TTL_MS, so switching screens (or two
+ * stores wanting overlapping data) doesn't refetch something that's barely
+ * stale. Any write invalidates everything under that resource's root, so a
+ * create/update/delete always shows up on the next read.
  *
- * Placed outermost in `withInterceptors([...])`: a cache hit returns
- * immediately and never reaches `errorInterceptor` or `retryInterceptor`.
+ * Sits outermost in the interceptor chain — a cache hit returns right away
+ * and never even reaches errorInterceptor or retryInterceptor.
  */
 export const cacheInterceptor: HttpInterceptorFn = (req, next) => {
   const cache = inject(HttpCacheStore);

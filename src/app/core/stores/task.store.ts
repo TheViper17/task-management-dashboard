@@ -18,15 +18,15 @@ import { ActivityStore } from './activity.store';
 import { UserStore } from './user.store';
 
 /**
- * Single source of truth for task state. Every read the UI needs is a
- * `computed()` derived from one `httpResource`-backed array — nothing is
- * stored twice, so nothing can go stale relative to it. Every write is a
- * command method that applies an optimistic update, calls the API, and
- * either reconciles with the server's response or rolls back on failure.
+ * Owns all task state. Everything the UI reads is computed() from one
+ * httpResource-backed array, so nothing is stored twice and nothing can
+ * drift out of sync with it. Every write is a command method: apply an
+ * optimistic update, call the API, then reconcile with the response or
+ * roll back on failure.
  *
- * Components never touch a signal directly; they read the `readonly`
- * signals below and call these commands. That one-way flow is what makes
- * the store's behaviour predictable without an NgRx-style action log.
+ * Components only read the signals below and call these commands — they
+ * never touch state directly. That's what keeps things predictable
+ * without needing an NgRx-style action log.
  */
 @Injectable({ providedIn: 'root' })
 export class TaskStore {
@@ -59,9 +59,9 @@ export class TaskStore {
   readonly statusMix = computed(() => countByStatus(this.tasks()));
 
   constructor() {
-    // Once the initial fetch resolves, backfill the activity feed from it —
-    // exactly once. Guarded by a plain flag (not a signal) since this is a
-    // one-time side effect, not derived state.
+    // Backfill the activity feed once the first fetch resolves, just the
+    // once — a plain flag rather than a signal, since this is a one-off
+    // side effect, not something derived from state.
     effect(() => {
       const tasks = this.resource.value();
       if (!this.hasSeededActivity && this.resource.status() === 'resolved' && tasks.length > 0) {
@@ -110,10 +110,10 @@ export class TaskStore {
 
     try {
       const created = await firstValueFrom(this.api.create(dto, assignee));
-      // Overlay the resolved assignee regardless of what the server echoed
-      // back — belt-and-braces alongside the API service sending it on the
-      // wire, since a template that reads `task.assignee.name` must never
-      // see this field missing.
+      // Overlay the resolved assignee regardless of what the server sent
+      // back — belt and braces on top of the API service already sending
+      // it, since task.assignee.name must never come up undefined in a
+      // template.
       const reconciled: Task = { ...created, assignee };
       this.resource.update((tasks) => tasks.map((t) => (t.id === optimistic.id ? reconciled : t)));
       this.activity.record('created', reconciled);
@@ -129,8 +129,8 @@ export class TaskStore {
     const previous = this.tasks();
     this.resource.update((tasks) => tasks.map((t) => (t.id === id ? applyTaskPatch(t, patch) : t)));
 
-    // Only resolved when the patch actually reassigns the task — see
-    // TaskApiService.update's doc comment for why this needs sending at all.
+    // Only resolved if the patch actually reassigns the task — see
+    // TaskApiService.update for why this even needs sending.
     const assignee = patch.assigneeId ? this.userStore.findById(patch.assigneeId) : undefined;
 
     try {

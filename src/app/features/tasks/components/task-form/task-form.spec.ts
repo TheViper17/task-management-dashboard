@@ -75,10 +75,10 @@ describe('TaskForm', () => {
       // The 20th of the currently-open month (September 2026, per the fixed clock).
       await user.click(await screen.findByRole('button', { name: 'September 20, 2026' }));
 
-      // Asserted on the reactive form's own value, not the input's rendered
-      // text — the overlay's close animation isn't synchronous, and the
-      // calendar dialog is itself aria-labelledby "Due date" while it's
-      // still around, which makes DOM-text assertions racy here.
+      // Asserted on the form's own value, not the input's rendered text —
+      // the overlay's close animation isn't synchronous, and the calendar
+      // dialog is itself aria-labelledby "Due date" while it's still
+      // around, which makes DOM-text assertions racy here.
       const component = fixture.componentInstance as unknown as {
         form: { controls: { dueDate: { value: Date | null } } };
       };

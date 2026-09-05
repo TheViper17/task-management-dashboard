@@ -5,14 +5,13 @@ import { TranslationService } from './translation.service';
 import type { TranslationKey } from './translations/en';
 
 /**
- * `{{ 'some.key' | translate }}` / `{{ 'some.key' | translate: { count } }}`.
+ * `{{ 'some.key' | translate }}` or `{{ 'some.key' | translate: { count } }}`.
  *
- * Deliberately impure: a *pure* pipe only re-runs when its own arguments
- * change by reference, so it would never notice `TranslationService`'s
- * locale signal changing internally. An impure pipe re-runs on every
- * change-detection pass instead — and in this zoneless app, writing to a
- * signal (like the locale) is exactly what schedules the next pass, so the
- * two are a matched pair, not a workaround.
+ * Impure on purpose — a pure pipe only re-runs when its own arguments
+ * change, so it'd never notice the locale signal changing inside
+ * TranslationService. An impure pipe re-runs on every change-detection
+ * pass instead, and in this zoneless app, writing to a signal is exactly
+ * what schedules that pass anyway.
  */
 @Pipe({ name: 'translate', pure: false })
 export class TranslatePipe implements PipeTransform {

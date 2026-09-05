@@ -10,9 +10,9 @@ const LABEL_KEYS: Record<TaskPriority, TranslationKey> = {
   medium: 'priority.medium',
   low: 'priority.low',
 };
-// Matches --app-priority-high/medium/low in _tokens.scss. Chart.js canvas
-// rendering can't read CSS custom properties, so these are the same hex
-// values duplicated intentionally — see the class doc comment.
+// Matches --app-priority-high/medium/low in _tokens.scss. Chart.js draws
+// to canvas and can't read CSS custom properties, so these are the same
+// hex values, duplicated on purpose — see the class comment.
 const COLORS: Record<TaskPriority, string> = {
   high: '#cb2d2d',
   medium: '#b45202',
@@ -20,10 +20,10 @@ const COLORS: Record<TaskPriority, string> = {
 };
 
 /**
- * Doughnut chart of task counts by priority. Chart.js draws to a `<canvas>`,
- * which can't pick up our CSS custom properties (colours are duplicated as
- * literal hex below) and is invisible to screen readers — the template also
- * renders an `.sr-only` list with the same numbers as real, readable text.
+ * Doughnut chart of task counts by priority. Chart.js draws to a canvas,
+ * which can't pick up CSS custom properties (colours are duplicated as
+ * literal hex below) and is invisible to screen readers — the template
+ * also renders an .sr-only list with the same numbers as real text.
  */
 @Component({
   selector: 'app-priority-chart',
@@ -39,10 +39,9 @@ export class PriorityChart {
 
   protected readonly priorities: readonly TaskPriority[] = ['high', 'medium', 'low'];
 
-  // Reads `this.i18n.translate(...)` (which reads the locale signal) inside
-  // this computed, not just `this.data()` — that's what makes it re-run,
-  // and Chart.js's canvas re-render along with it, when the language
-  // switches, not only when the underlying counts change.
+  // Reads this.i18n.translate(...) inside this computed, not just
+  // this.data() — that's what makes it (and Chart.js's canvas) re-render
+  // when the language switches, not just when the counts change.
   protected readonly chartData = computed<ChartConfiguration<'doughnut'>['data']>(() => {
     const data = this.data();
     return {

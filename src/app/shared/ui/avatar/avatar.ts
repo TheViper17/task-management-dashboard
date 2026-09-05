@@ -2,8 +2,8 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
 /**
  * A circular initials badge, used for the current user in the header and
- * for task assignees on cards. Purely presentational — no store, no
- * business logic — so it's testable as a plain render-and-assert.
+ * for task assignees on cards. Purely presentational, no store or
+ * business logic, so it's testable as a plain render-and-assert.
  */
 @Component({
   selector: 'app-avatar',

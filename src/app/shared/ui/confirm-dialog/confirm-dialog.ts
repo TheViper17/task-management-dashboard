@@ -13,10 +13,10 @@ export interface ConfirmDialogData {
 }
 
 /**
- * Generic yes/no confirmation dialog — used for "Delete this task?" per the
- * brief's requirement, but written so any future destructive action can
- * reuse it. Resolves `afterClosed()` with `true`/`false`/`undefined`
- * (backdrop click or Escape).
+ * Generic yes/no confirmation dialog — used for "Delete this task?" per
+ * the brief, but written so any future destructive action can reuse it.
+ * afterClosed() resolves with true/false/undefined (backdrop click or
+ * Escape).
  */
 @Component({
   selector: 'app-confirm-dialog',

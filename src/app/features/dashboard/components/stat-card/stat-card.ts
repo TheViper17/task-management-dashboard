@@ -4,12 +4,11 @@ import type { TranslationKey } from '../../../../core/i18n/translations/en';
 import type { Statistic } from '../../../../core/models/statistic.model';
 
 /**
- * `title`/`changeLabel` are free-text from the (mock) statistics API — a
- * real backend's own copy, not this app's template. Rather than trying to
+ * title/changeLabel are free text from the (mock) statistics API — a
+ * real backend's own copy, not this app's. Rather than trying to
  * translate arbitrary server text, each known stat is matched by its
- * stable `id` to a translation key here; an id this map doesn't recognise
- * falls back to the server's own text untranslated (better than a blank
- * card, and exactly what a real backend's text would need to do anyway).
+ * stable id to a translation key here; an id this map doesn't recognise
+ * falls back to the server's own text untranslated.
  */
 const TITLE_KEY_BY_ID: Record<string, TranslationKey> = {
   'stat-001': 'stat.totalTasks',
@@ -25,10 +24,10 @@ const CHANGE_LABEL_KEY_BY_TEXT: Record<string, TranslationKey> = {
 };
 
 /**
- * One dashboard stat card (Total Tasks / Completed / In Progress / Overdue).
- * The delta line reads "{change} {changeLabel}" (e.g. "+12 this week"),
- * except when `change` is the literal "0" — then only the label is shown
- * ("Same as yesterday"), matching the Figma "In Progress" card exactly.
+ * One dashboard stat card (Total Tasks / Completed / In Progress /
+ * Overdue). The delta line reads "{change} {changeLabel}" (e.g. "+12 this
+ * week"), except when change is literally "0" — then it's just the label
+ * ("Same as yesterday"), matching the Figma "In Progress" card.
  */
 @Component({
   selector: 'app-stat-card',

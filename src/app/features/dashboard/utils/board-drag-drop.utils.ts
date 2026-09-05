@@ -5,10 +5,10 @@ import type { Task, TaskStatus } from '../../../core/models/task.model';
 const PREFIX = 'board-column-';
 
 /**
- * Each kanban column is a `cdkDropList` whose `id` encodes its status
- * (`board-column-todo`, etc). Centralised here — rather than string-built
- * separately in `BoardColumn` and `DashboardPage` — so the two can never
- * drift out of sync with each other.
+ * Each kanban column is a cdkDropList whose id encodes its status
+ * (board-column-todo, etc). Centralised here rather than built
+ * separately in BoardColumn and DashboardPage, so the two can never
+ * drift out of sync.
  */
 export function boardColumnListId(status: TaskStatus): string {
   return `${PREFIX}${status}`;
@@ -27,14 +27,15 @@ export interface TaskOrderPatch {
 
 /**
  * Computes the minimal set of status/order patches a drag-drop event
- * requires. A pure function (no store, no component) so the reorder math —
- * the part actually worth testing — is verifiable without a fake CDK
- * pointer gesture, which jsdom can't produce.
+ * needs. A plain function (no store, no component), so the reorder math —
+ * the part actually worth testing — can be checked without a fake CDK
+ * pointer gesture, which jsdom can't produce anyway.
  *
- * Same-column reorder and cross-column move both reduce to "recompute the
- * affected column(s)' final visual order, patch only what changed": moving
- * one card in a 3-card column doesn't need 3 PATCH requests, only the cards
- * whose status or order actually differ from what's already persisted.
+ * Same-column reorder and cross-column move both boil down to the same
+ * thing: recompute the affected column's final order and patch only what
+ * changed. Moving one card in a 3-card column doesn't need 3 PATCH
+ * requests, just the cards whose status or order actually differ from
+ * what's already persisted.
  */
 export function computeTaskOrderPatches(event: CdkDragDrop<readonly Task[]>): TaskOrderPatch[] {
   const targetStatus = statusFromBoardColumnListId(event.container.id);

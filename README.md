@@ -1,18 +1,17 @@
 # Task Management Dashboard
 
-A production-shaped Task Management Dashboard built for a senior Angular
-developer assignment — Angular 22 (zoneless, standalone, Signals),
-Angular Material, `httpResource`, Reactive Forms, Chart.js, and a
-json-server mock backend, matching the provided Figma design.
+A task management dashboard built for a senior Angular developer take-home
+assignment. Angular 22, zoneless, standalone components, Signals, Angular
+Material, `httpResource`, Reactive Forms, Chart.js, and a json-server mock
+backend, matching the Figma design that came with the brief.
 
 **Live repo:** https://github.com/TheViper17/task-management-dashboard
 
-> The brief asked for Angular 20/21.next. `@angular/cli@latest` resolved
-> to **Angular 22.1.5** (current stable at the time of writing) — kept
-> deliberately, since it's a strict superset of what was asked and ships
-> `httpResource` as **stable** public API rather than developer-preview.
-> See [Architecture Decisions](#architecture-decisions) for the reasoning
-> behind every other non-obvious choice below.
+> The brief asked for Angular 20/21.next. Running `@angular/cli@latest` gave
+> me Angular 22.1.5, the current stable release, and I kept it — it's a
+> superset of what was asked, and `httpResource` ships stable there instead
+> of as developer preview. Other non-obvious choices are explained in
+> [Architecture decisions](#architecture-decisions).
 
 ---
 
@@ -49,24 +48,24 @@ json-server mock backend, matching the provided Figma design.
 
 ## Features
 
-**Task management** — create, edit (modal, reactive form), delete (with
-confirmation), filter by status/priority/assignee, real-time search,
-drag-and-drop between and within columns.
+**Task management** — create, edit, and delete tasks (with a confirmation
+step), filter by status, priority, or assignee, search in real time, and
+drag and drop between and within columns.
 
-**Dashboard** — 4 live stat cards, priority/status distribution charts
-(Chart.js), a recent-activity feed, a team directory with live per-user
-task counts.
+**Dashboard** — 4 live stat cards, priority/status charts (Chart.js), a
+recent-activity feed, and a team directory showing live per-user task
+counts.
 
-**Internationalization** (bonus item) — English and Arabic, switched
-instantly from the header, with full RTL layout mirroring and real
-grammatical plural support. See [Internationalization](#internationalization).
+**Internationalization** (bonus item) — English and Arabic, switched from
+the header, with real RTL layout mirroring and proper grammatical plurals.
+See [Internationalization](#internationalization).
 
-**Everything the brief's "Must Do" list asks for**: standalone components
-throughout, Signals for state, smart/presentational split, `httpResource`
-for reads, HTTP-interceptor response caching, OnPush everywhere, lazy
-loading per feature, Reactive Forms with custom validators and a dynamic
-`FormArray`, Angular Material, responsive layout, skeleton/error states,
-≥80% enforced test coverage, ESLint + Prettier + Husky, conventional
+**Everything on the brief's "Must Do" list**: standalone components,
+Signals for state, a smart/presentational split, `httpResource` for reads,
+interceptor-based response caching, OnPush everywhere, lazy loading per
+feature, Reactive Forms with custom validators and a dynamic `FormArray`,
+Angular Material, a responsive layout, skeleton/error states, 80%+
+enforced test coverage, ESLint + Prettier + Husky, and conventional
 commits.
 
 ---
@@ -75,8 +74,8 @@ commits.
 
 ### Prerequisites
 
-- Node.js **24.x** (the exact version this was built and CI-tested against;
-  Angular 22 supports `^20.19 || ^22.12 || ^24`, so 22.12+ also works)
+- Node.js **24.x** — what this was built and CI-tested against. Angular
+  22 supports `^20.19 || ^22.12 || ^24`, so anything 22.12+ works too.
 - npm 11.x (ships with Node 24)
 
 ### Installation
@@ -87,8 +86,9 @@ cd task-management-dashboard
 npm install
 ```
 
-`npm install` also runs `prepare` (Husky), wiring the pre-commit /
-commit-msg / pre-push git hooks automatically — no separate setup step.
+`npm install` also runs Husky's `prepare` step, so the pre-commit /
+commit-msg / pre-push git hooks are wired up automatically — nothing extra
+to set up.
 
 ### Running it
 
@@ -96,15 +96,15 @@ commit-msg / pre-push git hooks automatically — no separate setup step.
 npm run dev
 ```
 
-This runs the Angular dev server (`:4200`) and the json-server mock API
-(`:3000`) together via `concurrently`. Angular's dev-server proxy
-(`proxy.conf.json`) forwards `/api/*` to `:3000`, so the app always calls
-a same-origin `/api/...` path regardless of what's serving it.
+This starts the Angular dev server (`:4200`) and the json-server mock API
+(`:3000`) together, via `concurrently`. The dev-server proxy
+(`proxy.conf.json`) forwards `/api/*` to `:3000`, so the app always talks
+to a same-origin `/api/...` path no matter what's actually serving it.
 
 Open **http://localhost:4200**.
 
-To run either piece alone: `npm start` (Angular only) or `npm run api`
-(json-server only, needed if you're pointing the frontend at it from
+To run just one piece: `npm start` for Angular alone, or `npm run api` for
+just json-server (useful if you're pointing the frontend at it from
 somewhere else).
 
 ---
@@ -131,20 +131,20 @@ somewhere else).
 
 ## Environment configuration
 
-There's no `environment.ts`/`environment.prod.ts` split — the only
-environment-sensitive value is the API base URL, and it's resolved the
-same way in every environment: the app always calls the **relative**
-path `/api/...` (see the `API_BASE_URL` injection token in
-`app.config.ts`), and whatever's in front of it decides where that goes:
+There's no `environment.ts`/`environment.prod.ts` split. The only value
+that actually changes between environments is the API base URL, and it's
+handled the same way everywhere: the app always calls the relative path
+`/api/...` (see the `API_BASE_URL` token in `app.config.ts`), and
+whatever's in front of it decides where that actually goes:
 
 | Context               | `/api` is handled by                                                  |
 | --------------------- | --------------------------------------------------------------------- |
 | `npm run dev`         | Angular CLI dev-server proxy (`proxy.conf.json`) → `localhost:3000`   |
 | Any other static host | Reverse-proxy `/api` to wherever json-server (or a real backend) runs |
 
-The response-cache TTL (`CACHE_TTL_MS`, 30s) is likewise a plain provider
-value in `app.config.ts`, not an environment file — there was never a
-reason for it to differ between dev and prod for this app.
+The response-cache TTL (`CACHE_TTL_MS`, 30s) is the same kind of plain
+provider value in `app.config.ts` rather than an environment file — it
+never needed to differ between dev and prod here.
 
 ---
 
@@ -164,96 +164,91 @@ src/app/
     └── team/         # user directory
 ```
 
-The dependency rule: `features → core, shared`, never the reverse, and
-features don't import each other — **with one deliberate exception**:
-`DashboardPage` and `Shell` both import `features/tasks/task-dialog.service`
-to open the create/edit dialog. Duplicating that dialog-opening logic in
-two places, or inventing a new architectural layer just to host one
-shared service, would have cost more clarity than the exception costs.
+The rule: `features` can depend on `core` and `shared`, never the other
+way, and features don't import each other. One exception — both
+`DashboardPage` and `Shell` import `features/tasks/task-dialog.service` to
+open the create/edit dialog. Duplicating that logic in two places, or
+inventing a whole new layer just to hold one shared service, seemed worse
+than just breaking the rule here.
 
 ### Smart / presentational split
 
-Every "smart" component is a page (`DashboardPage`, `AnalyticsPage`,
-`TeamPage`) or the layout shell (`Shell`) — the only components that
-`inject()` a store or open a dialog. Everything else is a pure function
-of its `input()`s emitting `output()`s, `ChangeDetectionStrategy.OnPush`,
-with no injected domain state. That split is what makes ~30 of this
-project's ~38 components testable as a plain render-and-assert, which is
-most of how the 80% coverage bar was cleared without heavy `TestBed`
-wiring per test.
+The only components that `inject()` a store or open a dialog are the
+pages (`DashboardPage`, `AnalyticsPage`, `TeamPage`) and the layout shell
+(`Shell`) — everything else just reacts to its own `input()`s and emits
+`output()`s, with `OnPush` and no injected state. About 30 of this
+project's ~38 components fall into that second group, which is most of
+why hitting 80% coverage didn't need much `TestBed` setup per test — most
+components are just render-and-assert.
 
 ### Zoneless
 
-Angular 22 makes zoneless the default the moment `zone.js` isn't a
-dependency (it isn't, here) — `provideZonelessChangeDetection()` is
-still called explicitly in `app.config.ts` to state that intent rather
-than lean on an absence. Combined with Signals + OnPush everywhere, this
-removes an entire class of "why didn't the view update" debugging and is
-a smaller shipped bundle.
+Angular 22 goes zoneless by default once `zone.js` isn't a dependency,
+which it isn't here — but `provideZonelessChangeDetection()` is still
+called explicitly in `app.config.ts`, so the intent is stated rather than
+implied by an absence. Combined with Signals and OnPush everywhere, this
+cuts out a whole category of "why didn't the view update" debugging, and
+the shipped bundle is smaller too.
 
 ### `httpResource`, and where it stops
 
-`httpResource` (stable as of Angular 22) backs every _read_: `TaskStore`,
-`UserStore`, `StatisticsStore` all fetch this way. But `TaskStore`'s
-mutations (`create`/`update`/`remove`/`move`) go through the plain
-`TaskApiService` (`HttpClient`) and then call `.update()`/`.set()` on the
-resource's own writable signal directly — not through the resource's
-async loader. `httpResource` is shaped for reactive re-fetching; a task
-board with optimistic updates and rollback needs to mutate its own state
-synchronously the instant a user acts, and reconcile with the server
-after. Using the right tool for each half, and being explicit about why,
-is the point — not forcing one abstraction to do both jobs.
+`httpResource` (stable in Angular 22) handles every read — `TaskStore`,
+`UserStore`, and `StatisticsStore` all fetch this way. Writes are
+different: `create`/`update`/`remove`/`move` go through the plain
+`TaskApiService` (`HttpClient`), then patch the resource's own signal
+directly rather than going through its async loader. `httpResource` is
+built for reactive re-fetching, and a task board doing optimistic updates
+with rollback needs something that can mutate synchronously the moment a
+user acts, then reconcile with the server afterward. Two different jobs,
+two different tools.
 
 ### Interceptor order (a mistake I caught while building it)
 
 `provideHttpClient(withInterceptors([cacheInterceptor, errorInterceptor, retryInterceptor]))`
-— cache outermost, retry innermost. The original plan had retry and error
-swapped. Building it surfaced the real question: if `retry` sits _outside_
-`error`, it only ever sees already-mapped `AppError` objects and can't
-tell a retryable 503 from a non-retryable 404 apart — the user would see
-duplicate or wrong toasts. Retry has to sit closest to the backend, seeing
-the raw `HttpErrorResponse`, and only once it's exhausted its attempts (or
-declined to retry a 4xx) does the error reach the mapping/notification
-layer. Documented in each interceptor's own JSDoc, not just here.
+— cache outermost, retry innermost. I originally had retry and error the
+other way round. While building it, it became clear that was wrong: if
+retry sits outside error, it only ever sees already-mapped `AppError`
+objects, and can't tell a retryable 503 from a non-retryable 404. Retry
+needs to be closest to the backend, seeing the raw `HttpErrorResponse` —
+only once it's exhausted its attempts (or skipped a 4xx) should the error
+reach the mapping/notification layer. Each interceptor's own comment
+explains this too, not just this section.
 
 ### Caching
 
-`cacheInterceptor` caches GET responses in an injectable `HttpCacheStore`
-(a plain `Map`, TTL-based) and invalidates every cached entry under a
-resource's root the moment any non-GET request touches that resource —
-so a create/update/delete is never left looking stale by a cache hit.
+`cacheInterceptor` caches GET responses in `HttpCacheStore`, an injectable
+wrapper around a plain TTL-based `Map`. Any non-GET request invalidates
+everything under that resource's root, so a create/update/delete never
+gets left looking stale by an old cache hit.
 
 ---
 
 ## State management
 
-Signals + a per-domain "store" service (`TaskStore`, `UserStore`,
-`StatisticsStore`, `ActivityStore`), no NgRx. The brief explicitly leans
-this way ("Signals for reactive state management where appropriate"),
-and a single-entity-type app like this doesn't carry NgRx's
-action/reducer/effect boilerplate well enough to justify it.
+Signals plus a per-domain store service — `TaskStore`, `UserStore`,
+`StatisticsStore`, `ActivityStore` — no NgRx. The brief already leans this
+way ("Signals for reactive state management where appropriate"), and an
+app with this few entity types doesn't really need NgRx's
+action/reducer/effect machinery.
 
-The rule every store follows: **one array of state, everything else
-derived.** `TaskStore.tasks` is the only thing actually stored;
-`filteredTasks`, `columns`, `counts`, `priorityMix`, `statusMix` are all
-`computed()` from it, so nothing can drift out of sync with the source of
-truth by construction — there's no "did I forget to update the count
-too" class of bug available to write.
+Every store follows the same rule: one array of real state, everything
+else derived from it. `TaskStore.tasks` is the only thing actually
+stored — `filteredTasks`, `columns`, `counts`, `priorityMix`, and
+`statusMix` are all `computed()` from it. Nothing can drift out of sync,
+because there's nothing to forget to keep in sync in the first place.
 
-**Optimistic updates, uniformly.** Every mutation (`create`, `update`,
-`remove`, `move`) patches the signal immediately, calls the API, and
-either reconciles with the real response or restores the previous
-snapshot on failure. The drag-and-drop reorder math
-(`computeTaskOrderPatches`) reduces cross-column moves to the same
-primitive: recompute a column's final order, patch only the entries that
-actually changed.
+**Optimistic updates everywhere.** Every mutation — `create`, `update`,
+`remove`, `move` — patches the signal right away, calls the API, then
+either reconciles with the real response or rolls back to the previous
+snapshot if it fails. Drag-and-drop reordering (`computeTaskOrderPatches`)
+boils down to the same idea: recompute a column's final order and only
+patch what actually changed.
 
-**The mock API's static seed numbers are never trusted for the headline
-stat-card values** — `mergeLiveStatistics` overrides `value` with the
-live count derived from `TaskStore`, while keeping the seed data's
-`change`/`changeLabel` delta text (flavour the backend has no way for us
-to derive). The seed data says "156 total tasks"; this repo's dataset
-has 17. The card says 17.
+**The stat cards' headline numbers never come from the mock API's static
+seed data.** `mergeLiveStatistics` swaps in the real count from
+`TaskStore`, keeping only the seed's `change`/`changeLabel` text (which
+there's no way to derive live). The seed data claims "156 total tasks";
+this repo's actual dataset has 17. The card says 17.
 
 ---
 
@@ -263,38 +258,38 @@ has 17. The card says 17.
 "Forms":
 
 - **Custom validators** (`features/tasks/validators/task.validators.ts`,
-  unit-tested independently of any component): `notInPastValidator`,
-  `assigneeExistsValidator` (checks against the _live_ assignee list via
-  a getter, not a snapshot), `maxTagsValidator`, `nonBlankValidator`.
+  tested independently of any component): `notInPastValidator`,
+  `assigneeExistsValidator` (checks the live assignee list via a getter,
+  not a snapshot), `maxTagsValidator`, `nonBlankValidator`.
 - **Dynamic form controls**: `tags` is a `FormArray` the user grows and
   shrinks, capped at 5.
-- **Form state management**: the due-date validator itself changes
-  between create and edit mode — a brand-new task can't be created
-  already overdue, but editing an already-overdue task shouldn't force
-  its date forward just to satisfy the same rule.
-- **Error handling and display**: touched-gated `mat-error` per field;
-  the submit button is deliberately never `disabled` — clicking it while
-  invalid calls `markAllAsTouched()` to reveal every error at once,
-  standard and more helpful than a button that silently refuses to do
+- **Form state management**: the due-date validator changes depending on
+  create vs. edit mode — you can't create a task that's already overdue,
+  but editing one that's already overdue shouldn't force the date forward
+  just to satisfy that same rule.
+- **Error handling and display**: touched-gated `mat-error` per field.
+  The submit button is never disabled on purpose — clicking it while
+  invalid calls `markAllAsTouched()` and reveals every error at once,
+  which is more helpful than a button that just silently refuses to do
   anything.
 
 ---
 
 ## Testing strategy
 
-**Vitest** (Angular 22's own default `ng test` runner, not swapped for
-Jest) + **Angular Testing Library**, favouring behaviour-focused,
-accessible queries (`getByRole`, `getByLabelText`) over implementation
-details.
+**Vitest** (Angular 22's own default `ng test` runner — not swapped in
+from Jest) plus **Angular Testing Library**, favoring accessible,
+behavior-focused queries (`getByRole`, `getByLabelText`) over
+implementation details.
 
 - **Pure functions** (`task.utils`, `date.utils`, `statistic.utils`,
-  `board-drag-drop.utils`, the form validators) are tested directly with
-  no Angular test machinery at all — this is where the reorder math,
+  `board-drag-drop.utils`, the form validators) get tested directly, no
+  Angular test machinery involved. This is where the reorder math,
   overdue logic, and relative-time formatting actually live, and where
-  most of the edge cases are proven.
-- **Presentational components** render with inputs and assert DOM +
-  emitted outputs — no injected providers needed for ~30 of the ~38
-  components in this app.
+  most of the edge cases get proven.
+- **Presentational components** render with inputs, then assert on the
+  DOM and emitted outputs — no injected providers needed for about 30 of
+  this app's 38 components.
 - **Stores** are tested with the relevant `*ApiService` mocked, asserting
   signal state after each command, including the optimistic-update and
   rollback-on-failure paths.
@@ -306,36 +301,36 @@ details.
   confirm, assert the store call).
 
 **Coverage gate**: `angular.json`'s `test` target sets
-`coverageThresholds` to 80% on statements/branches/functions/lines —
-`ng test` (what CI runs) **fails the build**, not just reports a number,
-if any of them drop below 80%. Current: **99%+ on all four** (see the
-badge-style summary printed by `npm test`).
+`coverageThresholds` to 80% across statements, branches, functions, and
+lines. `ng test` (what CI runs) actually fails the build if any of them
+drop below that — it doesn't just print a number and move on. Currently
+sitting at 99%+ on all four; run `npm test` to see the summary.
 
-**One recurring gotcha, documented rather than hidden**: `mat-menu`
-(used by every card's "more actions" menu and the priority filter)
-depends on Angular's CDK Overlay, which needs _real_ timers to open —
-faking `Date` for deterministic "today" in the same spec file that also
-opens a menu needs `vi.useFakeTimers({ toFake: ['Date'] })`, not a bare
-`vi.useFakeTimers()`, or the menu interaction silently hangs until the
-test's own timeout. See `task-card.spec.ts` for the fix in context.
+**One gotcha worth knowing about**: `mat-menu` (the card "more actions"
+menu, the priority filter) relies on CDK Overlay, which needs real timers
+to actually open. If a spec file also fakes `Date` for a deterministic
+"today," use `vi.useFakeTimers({ toFake: ['Date'] })` rather than a bare
+`vi.useFakeTimers()` — otherwise the menu interaction just hangs until
+the test times out. `task-card.spec.ts` has the fix in context.
 
 ---
 
 ## Performance optimizations
 
-- **`OnPush`** on every component — enforced by an ESLint rule
-  (`@angular-eslint/prefer-on-push-component-change-detection`), not
-  just a habit.
+- **`OnPush`** on every component, enforced by an ESLint rule
+  (`@angular-eslint/prefer-on-push-component-change-detection`) rather
+  than just habit.
 - **Zoneless** change detection (see [above](#zoneless)).
-- **Lazy loading per feature**: every route (`dashboard`, `tasks`
-  dialog, `analytics`, `team`) is its own `loadComponent` chunk. Verified
-  by reading the actual build output, not assumed:
+- **Lazy loading per feature**: every route (`dashboard`, the `tasks`
+  dialog, `analytics`, `team`) is its own `loadComponent` chunk. I
+  checked this against the real build output rather than assuming it
+  worked:
   - Registering Chart.js's `provideCharts(withDefaultRegisterables())`
-    at the app root originally pulled all of Chart.js into the **eager**
-    bundle even though `AnalyticsPage` is lazy — the initial bundle blew
-    past the 500kB budget by 182kB for a chart a user might never open.
-    Moving the provider onto `AnalyticsPage`'s own component `providers`
-    dropped the initial bundle from **682kB → 471kB**.
+    at the app root pulled all of Chart.js into the eager bundle, even
+    though `AnalyticsPage` itself is lazy — the initial bundle blew past
+    the 500kB budget by 182kB, for a chart someone might never open.
+    Moving that provider onto `AnalyticsPage`'s own `providers` array
+    brought the initial bundle down from 682kB to 471kB.
 - **HTTP response caching** via `cacheInterceptor` (see above), so
   navigating back to an already-fetched view doesn't always re-hit the
   network within the TTL window.
@@ -345,36 +340,36 @@ test's own timeout. See `task-card.spec.ts` for the fix in context.
 - **`@for` with `track`** everywhere a list renders (never index-based),
   so Angular can diff and reuse DOM nodes instead of tearing lists down
   and rebuilding them on every change.
-- **`@defer`-shaped thinking without needing it**: heavy, rarely-visited
-  features (Analytics/Chart.js, the Tasks dialog) are already
-  route-boundary-lazy, which is the coarser but simpler tool for the
-  same problem.
+- **Didn't need `@defer`**: the heavy, rarely-visited stuff
+  (Analytics/Chart.js, the Tasks dialog) is already lazy at the route
+  boundary, which is a coarser but simpler way to solve the same problem.
 
 ---
 
 ## Accessibility
 
-- **Computed, not eyeballed, contrast**: every colour-token pair actually
-  in use was checked against WCAG 2.1 AA (4.5:1 for text) with a small
-  script rather than assumed correct because it "looked fine" — two
-  genuinely failed (medium-priority badge text was 2.86:1; high-priority/
-  overdue text was 4.35:1) and were corrected with the minimal darkening
-  that clears 4.5:1 on every surface they're actually rendered against.
+- **Contrast was actually measured, not eyeballed**: every colour pair in
+  use got checked against WCAG 2.1 AA (4.5:1 for text) with a small
+  script, instead of trusting that it "looked fine." Two pairs genuinely
+  failed — medium-priority badge text was 2.86:1, high-priority/overdue
+  text was 4.35:1 — and both got the minimum darkening needed to clear
+  4.5:1.
 - **Skip-to-content link**, visible on keyboard focus.
 - **`:focus-visible`** styled globally, not suppressed.
-- **`prefers-reduced-motion`** collapses every animation (including the
-  loading-skeleton pulse) to near-instant globally, once, rather than
-  per-component.
-- Chart.js draws to a `<canvas>`, which is both invisible to screen
-  readers and can't read CSS custom properties — every chart also
-  renders an `.sr-only` list exposing the same numbers as real,
-  readable text, and its colours are the same palette duplicated as
-  literal hex (documented inline as to why).
+- **`prefers-reduced-motion`** collapses every animation — including the
+  loading-skeleton pulse — to near-instant, globally, in one place rather
+  than per component.
+- Chart.js draws to a `<canvas>`, which is invisible to screen readers
+  and can't read CSS custom properties. Every chart also renders a hidden
+  `.sr-only` list with the same numbers as real text, and its colours are
+  the same palette duplicated as literal hex (with a comment explaining
+  why, right where it's duplicated).
 - Every icon-only button has an `aria-label`; every decorative icon is
   `aria-hidden`; `routerLinkActive` drives `aria-current="page"`.
-- The responsive sidebar drawer is Angular Material's `MatSidenav`,
-  which brings backdrop, focus-trapping (in `'over'` mode), and
-  keyboard/Escape handling for free rather than reimplementing them.
+- The responsive sidebar drawer is Angular Material's `MatSidenav`, which
+  comes with backdrop, focus-trapping in `'over'` mode, and
+  keyboard/Escape handling built in — none of that had to be
+  reimplemented.
 
 Full WCAG 2.1 AA compliance (the brief's bonus item) hasn't been audited
 with a tool like axe or Lighthouse — see
@@ -384,87 +379,81 @@ with a tool like axe or Lighthouse — see
 
 ## Internationalization
 
-English (primary) and Arabic (secondary, full RTL), switched instantly from
-the globe icon in the header — no page reload for the switch itself to
-register, though changing language does trigger one deliberately (see
-below). The choice persists to `localStorage` and is detected from the
-browser's language on first visit otherwise.
+English (primary) and Arabic (secondary, full RTL), switched from the
+globe icon in the header. The choice is saved to `localStorage`, and
+falls back to detecting the browser's language on first visit. Switching
+language does trigger a page reload — deliberately, explained below.
 
-**A small custom service, not `@angular/localize`.** Angular's official
-i18n pipeline compiles one separate app bundle per locale — great for a
-multi-region deployment behind locale-prefixed URLs, but it rules out an
-in-page language toggle without navigating to a different build entirely.
-This app ships one build and switches language at runtime instead, the
-same "match the actual requirement, don't reach for the heavy default"
-call already made for state management (signals, not NgRx) and toasts (a
-small `NotificationService`, not a toast library). The whole thing is
-`core/i18n/`: a `TranslationService` (a signal holding the current locale,
-a `translate(key, params)` method), an impure `TranslatePipe` for
-templates (impure deliberately — a pure pipe only re-runs when its own
-arguments change, never noticing the locale signal changing internally;
-writing to a signal is what schedules the next change-detection pass in
-this zoneless app, so an impure pipe and a signal-driven locale are a
-matched pair), and two typed dictionaries (`translations/en.ts`,
-`translations/ar.ts`) — Arabic is typed against English's exact key set,
-so adding a string in one without the other is a compile error, not a
-silently-missing translation discovered at runtime.
+**Why a small custom service instead of `@angular/localize`**: Angular's
+official i18n pipeline compiles a separate app bundle per locale, which
+is great for a multi-region deployment behind locale-prefixed URLs, but
+rules out an in-page toggle without navigating to a different build. This
+app switches language at runtime instead, in one build — the same call
+already made for state (signals over NgRx) and toasts (a small
+`NotificationService` over a toast library).
 
-**Real plural support, not `count === 1`.** Arabic distinguishes six
-grammatical plural categories (zero/one/two/few/many/other) where English
-only has two. A `count` param resolves through `Intl.PluralRules` to pick
-the correct category, so "6 يوم" (wrong) never ships — "يستحق خلال 6
-أيام" does, using the grammatically correct **few** form for 3–10, with
-**many** and **other** forms for higher counts.
+It all lives in `core/i18n/`: a `TranslationService` holding the current
+locale as a signal with a `translate(key, params)` method, an impure
+`TranslatePipe` for templates, and two typed dictionaries
+(`translations/en.ts`, `translations/ar.ts`). The pipe is impure on
+purpose — a pure pipe only re-runs when its own arguments change, so it'd
+never notice the locale signal changing internally. Arabic is typed
+against English's exact key set, so adding a string to one file without
+the other is a compile error, not a translation that's silently missing
+at runtime.
 
-**Full RTL, not just translated text in an LTR layout.** Switching to
-Arabic sets `dir="rtl"`, and the app's own layout — sidebar, spacing,
-card accents — is written in logical CSS properties
-(`border-inline-start`, `inset-inline-start`, …) rather than physical ones
-(`border-left`, `left`), so it mirrors automatically with no
-Arabic-specific overrides. Flexbox/Grid row layout (the board's three
-columns, the header's action row) mirrors on its own too — that's just
-how the inline axis works once `dir` is set, not something this app does
-manually.
+**Plurals use `Intl.PluralRules`, not `count === 1`.** Arabic has six
+grammatical plural categories — zero/one/two/few/many/other — against
+English's two. A `count` param resolves through `Intl.PluralRules` to
+pick the right one, so it's "يستحق خلال 6 أيام" (the correct _few_ form
+for 3–10), never a literal "6 يوم" bolted on the wrong way.
+
+**The layout actually mirrors — it's not just translated text sitting in
+an LTR layout.** Switching to Arabic sets `dir="rtl"`, and the app's own
+CSS uses logical properties (`border-inline-start`, `inset-inline-start`)
+instead of physical ones (`border-left`, `left`), so it mirrors
+automatically with no Arabic-specific overrides needed. Flexbox and Grid
+row layouts — the board's three columns, the header's action row —
+mirror on their own too, since that's just how the inline axis works
+once `dir` is set.
 
 **Why switching language reloads the page.** Angular CDK's
-`Directionality` — what every overlay-based Material component
-(`mat-menu`, `mat-select`, `mat-datepicker`, `mat-sidenav`) reads to
-decide which side it opens or anchors from — resolves `document.dir`
-exactly once, at its own construction, with no built-in way to re-mirror
-components that already exist. Mutating `document.dir` after the app has
-booted would flip this app's own CSS (which reads it live) but leave
-every Material overlay pointing the wrong way. A reload is the standard
-fix production Angular apps use for exactly that — and it's cheap here,
-since `TranslationService` re-applies `lang`/`dir`/the document title
-before the root component (and so before `Directionality`) is ever
-constructed, via a `provideAppInitializer` in `app.config.ts`.
+`Directionality` — what `mat-menu`, `mat-select`, `mat-datepicker`, and
+`mat-sidenav` all read to decide which side to open or anchor from —
+resolves `document.dir` once, at construction, with no way to re-mirror
+components that already exist. Just mutating `document.dir` after the
+app's booted would flip this app's own CSS (which reads it live) but
+leave every Material overlay pointing the wrong way. A reload is the
+standard fix for this. It's cheap here too: `TranslationService` sets
+`lang`/`dir`/the document title before the root component — and so
+before `Directionality` — is ever constructed, via a
+`provideAppInitializer` in `app.config.ts`.
 
-**Server-sourced text is matched by a stable id, never translated as
-free text.** The dashboard's stat cards (`title`/`changeLabel`) come from
-the (mock) statistics API — a real backend's own copy, not this app's
-template. Rather than attempting to translate arbitrary server strings,
-each known stat is matched by its stable `id` to a translation key; an id
-outside that known set falls back to the server's own text untranslated,
-same as a real backend's text would have to.
+**Server text gets matched by id, not translated as free text.** The
+dashboard stat cards' `title`/`changeLabel` come from the (mock)
+statistics API — a real backend's own copy, not this app's. Rather than
+trying to translate arbitrary server strings, each known stat id maps to
+a translation key; anything outside that known set just falls back to
+whatever the server sent, same as it would have to with a real backend.
 
 ---
 
 ## CI
 
-`.github/workflows/ci.yml` runs on every push/PR to `main`: lint +
-format check, the full test suite (which itself enforces the 80%
-coverage gate — a coverage drop fails the run, not just a report), and a
-production build (catching AOT/type errors dev mode can miss, and
-enforcing the bundle budget). Three independent jobs, so a lint failure
-doesn't block you from seeing whether tests also failed.
+`.github/workflows/ci.yml` runs on every push and PR to `main`: lint plus
+format check, the full test suite (which enforces the 80% coverage gate —
+a drop fails the run, it's not just reported), and a production build
+(which catches AOT/type errors dev mode can miss and enforces the bundle
+budget). Three separate jobs, so a lint failure doesn't hide whether the
+tests also failed.
 
 ---
 
 ## Known limitations & future improvements
 
-- **No authentication.** Out of scope per the brief. The header's
-  current-user avatar is just the first entry in the mocked user list —
-  documented inline where that shortcut is taken (`Shell`).
+- **No authentication.** Out of scope per the brief — the header's
+  current-user avatar is just the first entry in the mocked user list,
+  noted inline in `Shell` where that shortcut is taken.
 - **Activity feed is synthesized, not real.** The mock API has no
   activity collection, so `ActivityStore` seeds itself from the most
   recently updated tasks on first load, then appends an entry per
@@ -474,10 +463,10 @@ doesn't block you from seeing whether tests also failed.
   writes through). `npm run db:reset` regenerates it from the assignment's
   original generator with dates relative to _today_ — run it before a
   demo if the data's gotten stale or messy.
-- **Lighthouse / formal WCAG audit**: not run (bonus items). The a11y
-  work in this project (contrast computed and fixed, skip link, focus
-  management, sr-only chart summaries) was done to genuinely hold up
-  under an audit, but no audit tool was actually run against it.
+- **Lighthouse / a formal WCAG audit**: not run (both bonus items). The
+  a11y work here — measured contrast, skip link, focus management,
+  sr-only chart summaries — was done to actually hold up under an audit,
+  I just haven't run one.
 - **Calendar / Settings** are intentionally unbuilt placeholder routes —
   present in the Figma sidebar, not in the brief's functional
   requirements.
@@ -486,8 +475,8 @@ doesn't block you from seeing whether tests also failed.
   mitigation already in place: every status change reachable by drag is
   _also_ reachable through the fully keyboard-accessible Edit form (a
   `mat-select`), so no functionality is drag-only.
-- **If this grew past 4 users**: `TeamPage`'s per-user task count is an
-  O(tasks) scan on every render via a `computed()` — fine at this scale,
-  would want a `Map` built once per `tasks()` change instead at real
-  scale (an easy follow-up, not done pre-emptively since premature
-  optimization here would have been exactly that).
+- **If this grew past a handful of users**: `TeamPage`'s per-user task
+  count does an O(tasks) scan on every render via `computed()` — fine at
+  this scale, but I'd want a `Map` built once per `tasks()` change at
+  real scale. Didn't bother pre-emptively; that would've just been
+  premature optimization.

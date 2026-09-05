@@ -2,9 +2,9 @@ import { HttpErrorResponse } from '@angular/common/http';
 import type { AppError } from '../models/app-error.model';
 
 /**
- * Maps any error a request might throw into a closed, user-safe `AppError`.
- * Kept as a pure function (rather than inline in the interceptor) so the
- * mapping rules are unit-testable without spinning up `HttpClientTesting`.
+ * Maps any error a request might throw into a closed, user-safe AppError.
+ * Kept as a plain function rather than inline in the interceptor, so the
+ * mapping rules can be tested without spinning up HttpClientTesting.
  */
 export function toAppError(error: unknown): AppError {
   if (error instanceof HttpErrorResponse) {
@@ -30,8 +30,8 @@ export function toAppError(error: unknown): AppError {
       return {
         kind: 'validation',
         message: serverMessage ?? 'The request was invalid.',
-        // Only a *static* fallback has a translation — a message the
-        // server actually sent has no key to translate it by.
+        // Only a static fallback has a translation — a message the
+        // server actually sent has nothing to translate it against.
         ...(serverMessage ? {} : { messageKey: 'error.validation' }),
         status: error.status,
         cause: error,

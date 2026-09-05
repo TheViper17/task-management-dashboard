@@ -1,11 +1,11 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
 /**
- * A single pulsing placeholder block. Compose several to sketch the shape
- * of whatever's loading (a stat card, a task card, ...) — see
- * dashboard-page.html for the composed skeletons. `aria-hidden` because the
- * loading state itself is announced once, at the container level
- * (`role="status"`), not per placeholder block.
+ * A single pulsing placeholder block. Compose several to sketch the
+ * shape of whatever's loading (a stat card, a task card, ...) — see
+ * dashboard-page.html for the composed skeletons. aria-hidden because
+ * the loading state gets announced once, at the container level
+ * (role="status"), not per block.
  */
 @Component({
   selector: 'app-skeleton',

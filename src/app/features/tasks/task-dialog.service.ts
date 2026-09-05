@@ -11,9 +11,9 @@ import type { TaskFormDialogData } from './components/task-form-dialog/task-form
 
 /**
  * Owns the full "open the create/edit dialog, then persist the result"
- * flow. Centralised here (rather than duplicated in every place a "New
- * Task" or "Edit" action lives — the sidebar, the dashboard toolbar, a task
- * card's menu) so every entry point behaves identically.
+ * flow. Centralised here rather than duplicated everywhere a "New Task"
+ * or "Edit" action lives — the sidebar, the dashboard toolbar, a task
+ * card's menu — so every entry point behaves the same way.
  */
 @Injectable({ providedIn: 'root' })
 export class TaskDialogService {

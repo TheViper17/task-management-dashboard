@@ -6,9 +6,9 @@ export function generateId(): string {
 const OPTIMISTIC_PREFIX = 'optimistic-';
 
 /**
- * A placeholder id for an entity inserted into a store before the server has
- * confirmed it — see `TaskStore.create()`. Prefixed so `isOptimisticId` can
- * recognise it (e.g. to disable actions on a card that's still in flight).
+ * A placeholder id for something inserted into a store before the server
+ * confirms it — see TaskStore.create(). Prefixed so isOptimisticId can
+ * spot it, e.g. to disable actions on a card that's still in flight.
  */
 export function generateOptimisticId(): string {
   return `${OPTIMISTIC_PREFIX}${generateId()}`;

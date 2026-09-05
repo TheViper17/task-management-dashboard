@@ -31,9 +31,9 @@ import { PriorityBadge } from '../../../../shared/ui/priority-badge/priority-bad
 type EditableField = 'title' | 'description' | null;
 
 /**
- * A single board card. The hover accent colour is column-derived (blue for
- * To Do, amber for In Progress, green for Done — see design.png), except an
- * overdue task always gets the red/pink overdue treatment regardless of
+ * A single board card. The hover accent colour follows the column (blue
+ * for To Do, amber for In Progress, green for Done — see design.png),
+ * except an overdue task always gets the red/pink treatment regardless of
  * column, matching the design's overdue card variants.
  */
 @Component({
@@ -60,11 +60,11 @@ export class TaskCard {
   readonly edit = output<void>();
   readonly delete = output<void>();
   /**
-   * A title/description edited in place, ready for `TaskStore.update()`.
-   * Kept separate from `edit` (which opens the full modal) — the assignment
-   * brief allows "inline or modal", and this is the inline half for the two
-   * fields quick enough to rename without leaving the board; status,
-   * priority, due date, assignee, and tags still go through the modal.
+   * A title/description edited in place, ready for TaskStore.update().
+   * Kept separate from edit (which opens the full modal) — the brief
+   * allows "inline or modal," and this covers the two fields quick enough
+   * to rename without leaving the board. Status, priority, due date,
+   * assignee, and tags still go through the modal.
    */
   readonly quickEdit = output<TaskPatch>();
 
@@ -77,9 +77,9 @@ export class TaskCard {
   protected readonly draftError = signal<string | null>(null);
 
   constructor() {
-    // Focuses (and for the single-line title, selects) whichever field just
-    // became editable. Runs after the @if swaps in the input/textarea, since
-    // effects observe the view's rendered state, not just the signal write.
+    // Focuses (and for the single-line title, selects) whichever field
+    // just became editable. Runs after the @if swaps in the input/textarea,
+    // since effects react to the rendered view, not just the signal write.
     effect(() => {
       const field = this.editingField();
       if (field === 'title') {
@@ -100,14 +100,12 @@ export class TaskCard {
   protected readonly tags = computed(() => this.task().tags);
 
   /**
-   * Never trust `task().assignee` to be present — defensive by design, not
-   * just because of the mock backend's create/update quirk (already fixed
-   * upstream in TaskStore): a template that does `task.assignee.name`
-   * directly crashes the whole render pass the moment that assumption is
-   * ever wrong, for *any* reason (a stale cache entry, a user later
-   * deleted from the directory, a future backend inconsistency). Falling
-   * back to a visible "Unassigned" is a UI bug; an uncaught TypeError
-   * during change detection is a much worse one.
+   * Never trust task().assignee to actually be there. Even though the
+   * mock backend's create/update quirk is fixed upstream in TaskStore, a
+   * template reading task.assignee.name directly crashes the whole render
+   * the moment that assumption is wrong for any reason — a stale cache
+   * entry, a deleted user, a future backend inconsistency. Falling back
+   * to "Unassigned" is a UI bug; a crash mid-render is a much worse one.
    */
   protected readonly assigneeInitials = computed(() => this.task().assignee?.avatar ?? '?');
   protected readonly assigneeFirstName = computed(() => {
@@ -130,10 +128,10 @@ export class TaskCard {
 
   /**
    * Validates and, if changed, emits the draft. Reachable from both a
-   * field's `(blur)` and Enter/Cmd+Enter — guarded by `editingField()` so a
-   * blur that fires *after* Escape already closed the field (removing it
+   * field's (blur) and Enter/Cmd+Enter — guarded by editingField() so a
+   * blur that fires after Escape already closed the field (removing it
    * from the DOM triggers a blur too) is a harmless no-op, not a second
-   * commit of stale state.
+   * commit.
    */
   protected commitEdit(): void {
     const field = this.editingField();

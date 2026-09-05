@@ -91,9 +91,9 @@ describe('DashboardPage', () => {
 
   it('renders all three board columns', async () => {
     await setup();
-    // Column headings, not the status-filter toggle above them — both now
-    // render the same "To Do"/"In Progress"/"Done" text since the toggle
-    // and the column titles share the same translation keys.
+    // Column headings, not the status-filter toggle above them — both
+    // render the same "To Do"/"In Progress"/"Done" text now, since the
+    // toggle and the column titles share the same translation keys.
     expect(screen.getByRole('heading', { name: 'To Do' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'In Progress' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Done' })).toBeInTheDocument();
@@ -199,10 +199,9 @@ describe('DashboardPage', () => {
     });
   });
 
-  // Drag-and-drop's reorder math (computeTaskOrderPatches) is pure and
-  // tested directly in board-drag-drop.utils.spec.ts — no fake pointer
-  // events or component rendering needed there. onTaskMoved itself is a
-  // one-line adapter (apply whatever patches that function returns), and
-  // was verified live in a real browser (see the phase notes) rather than
-  // duplicating that coverage here.
+  // Drag-and-drop's reorder math (computeTaskOrderPatches) is tested
+  // directly in board-drag-drop.utils.spec.ts, no fake pointer events or
+  // rendering needed there. onTaskMoved is just a one-line adapter that
+  // applies whatever patches that function returns, and was checked live
+  // in a real browser rather than duplicating that coverage here.
 });

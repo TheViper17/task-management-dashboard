@@ -4,11 +4,16 @@
   display: flex;
   flex-direction: column;
   gap: var(--app-space-2);
-  // A comfortable width on desktop, but never wider than the viewport can
-  // give it — MatDialog's own maxWidth (see task-dialog.service.ts) already
-  // caps the dialog itself; this keeps the form from forcing a scrollbar
-  // inside that.
+  // A comfortable width on desktop, but never wider than the viewport
+  // allows — MatDialog's own maxWidth (task-dialog.service.ts) already
+  // caps the dialog itself, this just stops the form from forcing a
+  // scrollbar inside that.
   width: min(420px, 100%);
+  // Without this, the Title field's floating label — which straddles the
+  // field's own top border once it shrinks on blur — gets clipped by
+  // mat-dialog-content's scroll boundary right above it. A few pixels of
+  // clearance keeps the whole label on screen.
+  padding-top: 10px;
 
   mat-form-field {
     width: 100%;

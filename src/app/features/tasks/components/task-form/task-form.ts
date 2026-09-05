@@ -33,17 +33,17 @@ import {
 const MAX_TAGS = 5;
 
 /**
- * Create/edit task form. Presentational: takes an optional `task` (absent =
- * create mode) and the assignee directory, emits `save` with a ready-to-send
- * `CreateTaskDto` on valid submit, or `cancel`. The host (`TaskFormDialog`)
- * decides whether that DTO becomes a POST or a PATCH.
+ * Create/edit task form. Presentational — takes an optional task (absent
+ * means create mode) and the assignee directory, emits save with a
+ * ready-to-send CreateTaskDto on valid submit, or cancelled. The host
+ * (TaskFormDialog) decides whether that DTO becomes a POST or a PATCH.
  *
- * Demonstrates every "Forms" requirement from the brief:
+ * Covers every "Forms" item in the brief:
  *  - custom validators: notInPastValidator, assigneeExistsValidator,
- *    maxTagsValidator, nonBlankValidator (task.validators.ts, unit tested
- *    independently of this component)
- *  - dynamic form controls: `tags` is a FormArray the user grows/shrinks
- *  - form state management: the due-date validator itself changes based on
+ *    maxTagsValidator, nonBlankValidator (task.validators.ts, tested on
+ *    their own, independent of this component)
+ *  - dynamic form controls: tags is a FormArray the user grows and shrinks
+ *  - form state management: the due-date validator changes based on
  *    create vs. edit mode (see the constructor effect below)
  *  - error handling and display: touched-gated mat-error per field
  */
@@ -60,14 +60,14 @@ const MAX_TAGS = 5;
     MatSelectModule,
     TranslatePipe,
   ],
-  // Scoped here, not app-wide (app.config.ts) — the datepicker is only ever
-  // used by this form, so its adapter shouldn't ride along in every route's
-  // bundle. MAT_DATE_LOCALE is read once, at construction, from the app's
-  // current language — not bound reactively to it, because nothing needs
-  // it to be: switching language reloads the page (see
-  // TranslationService's own doc comment), so "correct at construction" is
-  // already "always correct". In English mode this factory returns the
-  // same 'en-US' the tests assert an exact formatted date against.
+  // Scoped here, not app-wide in app.config.ts — the datepicker is only
+  // used by this form, so its adapter shouldn't ride along in every
+  // route's bundle. MAT_DATE_LOCALE is read once at construction, not
+  // bound reactively, since nothing needs it to be: switching language
+  // reloads the page anyway (see TranslationService), so "correct at
+  // construction" is already "always correct." In English mode this
+  // factory returns the same 'en-US' the tests assert an exact date
+  // against.
   providers: [
     provideNativeDateAdapter(),
     {
@@ -83,8 +83,8 @@ export class TaskForm {
   readonly assignees = input.required<readonly Assignee[]>();
 
   readonly save = output<CreateTaskDto>();
-  // Named `cancelled`, not `cancel` — @angular-eslint/no-output-native
-  // forbids outputs named after native DOM events (cancel is one).
+  // Named cancelled, not cancel — @angular-eslint/no-output-native blocks
+  // outputs named after native DOM events, and cancel is one.
   readonly cancelled = output<void>();
 
   protected readonly isCreateMode = computed(() => !this.task());
@@ -116,10 +116,10 @@ export class TaskForm {
       nonNullable: true,
       validators: [Validators.required],
     }),
-    // Holds a `Date`, not the app's usual `"YYYY-MM-DD"` string — that's
-    // what mat-datepicker's native adapter speaks. Converted at the two
-    // boundaries this component owns: `parseIsoDateLocal`/`toIsoDateString`
-    // in the effect below and in `onSubmit()`.
+    // Holds a Date, not the app's usual "YYYY-MM-DD" string — that's what
+    // mat-datepicker's native adapter speaks. Converted at the two
+    // boundaries this component owns: parseIsoDateLocal/toIsoDateString,
+    // in the effect below and in onSubmit().
     dueDate: new FormControl<Date | null>(null, { validators: [Validators.required] }),
     assigneeId: new FormControl('', {
       nonNullable: true,
@@ -133,7 +133,7 @@ export class TaskForm {
   }
 
   constructor() {
-    // Reacts to `task` changing: pre-fills the form for edit mode, and
+    // Reacts to task changing: pre-fills the form for edit mode, and
     // toggles the due-date validator — a brand-new task can't be created
     // already overdue, but editing one shouldn't force its date forward.
     effect(() => {
@@ -178,8 +178,8 @@ export class TaskForm {
       return;
     }
 
-    // Non-null: `dueDate` is `Validators.required`, and the form is valid
-    // at this point, so the calendar/typed value is always present here.
+    // Non-null: dueDate is Validators.required and the form's valid at
+    // this point, so the typed value is always here.
     const value = this.form.getRawValue();
     this.save.emit({
       title: value.title,

@@ -6,12 +6,11 @@ import { API_BASE_URL } from '../tokens/api.tokens';
 const EMPTY_RESPONSE: StatisticsResponse = { statistics: [], lastUpdated: '' };
 
 /**
- * The 4 dashboard stat cards, as returned by the mock API. This is
- * deliberately *not* recomputed from `TaskStore`'s live task list — the
- * seeded `change` / `changeLabel` deltas ("+12 this week") don't exist
- * anywhere else, so they're sourced from the backend as-is. The live task
- * counts used elsewhere (e.g. board column badges) come from
- * `task.utils#deriveTaskCounts` instead.
+ * The 4 dashboard stat cards, straight from the mock API. Not recomputed
+ * from TaskStore's live tasks — the seeded change/changeLabel deltas
+ * ("+12 this week") don't exist anywhere else, so they come from the
+ * backend as-is. Live counts elsewhere (board column badges, etc.) come
+ * from task.utils#deriveTaskCounts instead.
  */
 @Injectable({ providedIn: 'root' })
 export class StatisticsStore {

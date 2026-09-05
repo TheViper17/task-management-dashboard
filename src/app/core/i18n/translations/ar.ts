@@ -2,20 +2,18 @@ import type { TranslationDictionary } from '../translation.model';
 import type { TranslationKey } from './en';
 
 /**
- * Arabic — the secondary language. Typed as `Record<TranslationKey, ...>`
- * (not `as const satisfies` like en.ts) specifically so it's *required* to
- * cover every key `en.ts` defines: add a key to `en.ts` and forget it here,
- * and this file fails to compile instead of silently falling back to
- * English at runtime for that one string.
+ * Arabic — the secondary language. Typed as Record<TranslationKey, ...>
+ * rather than `as const satisfies` like en.ts, so it's required to cover
+ * every key en.ts defines — forget one here and this file fails to
+ * compile instead of quietly falling back to English at runtime.
  *
- * Plural forms use real Arabic grammatical categories (zero/one/two/few/
- * many/other — Arabic distinguishes all six, unlike English's two), and
- * drop the redundant "واحد/واحدة" (a bare "دقيقة" already means "a minute" —
- * repeating "one" reads as stilted, machine-translated Arabic, the same way
- * "1 day(s)" would in English). Dual and plural nouns following a
- * preposition (خلال، منذ، بـ) take the genitive/accusative dual ending
- * (يومين), not the nominative (يومان) — grammatically correct here, not
- * interchangeable.
+ * Plurals use real Arabic grammatical categories (zero/one/two/few/many/
+ * other — Arabic has all six, English only two), and drop the redundant
+ * "واحد/واحدة": a bare "دقيقة" already means "a minute," so repeating "one"
+ * reads as stilted, machine-translated Arabic, the same way "1 day(s)"
+ * would in English. Dual/plural nouns after a preposition (خلال، منذ، بـ)
+ * take the genitive/accusative dual ending (يومين), not the nominative
+ * (يومان) — that's a real grammar rule here, not a typo.
  */
 export const ar: Record<TranslationKey, TranslationDictionary[string]> = {
   'app.title': 'مدير المهام',

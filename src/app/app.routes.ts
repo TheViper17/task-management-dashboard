@@ -1,12 +1,12 @@
 import type { Routes } from '@angular/router';
 
 /**
- * `withComponentInputBinding()` (enabled in app.config.ts) maps a route's
- * `data` object directly onto matching component `input()`s — that's how
- * `PlaceholderPage`'s `titleKey`/`subtitleKey` are set below with no
- * wrapper component per route. `data` is plain, static route config — it
- * can't call `TranslationService` itself, so these are translation *keys*,
- * resolved by `PlaceholderPage`'s own template.
+ * withComponentInputBinding() (enabled in app.config.ts) maps a route's
+ * data object onto matching component input()s — that's how
+ * PlaceholderPage gets its titleKey/subtitleKey below with no wrapper
+ * component per route. Route data is static and can't call
+ * TranslationService itself, so these are translation keys, resolved by
+ * PlaceholderPage's own template.
  */
 export const routes: Routes = [
   {

@@ -22,8 +22,9 @@ describe('toAppError', () => {
     expect(appError).toEqual(
       expect.objectContaining({ kind: 'validation', status: 422, message: 'Title is required' }),
     );
-    // A server-supplied message has no key to translate it by — the
-    // interceptor must show it exactly as sent, not a generic fallback.
+    // A server-supplied message has nothing to translate it against —
+    // the interceptor has to show it exactly as sent, not a generic
+    // fallback.
     expect(appError.messageKey).toBeUndefined();
   });
 

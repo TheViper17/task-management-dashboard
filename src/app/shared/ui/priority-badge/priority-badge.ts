@@ -5,9 +5,9 @@ import type { TaskPriority } from '../../../core/models/task.model';
 
 /**
  * Small coloured pill for a task's priority — HIGH / MEDIUM / LOW.
- * `| uppercase` is applied after translation and is a harmless no-op for
- * Arabic (the script has no case distinction), so it stays unconditional
- * rather than needing a language check.
+ * | uppercase runs after translation and is a harmless no-op for Arabic
+ * (the script has no case distinction), so it stays unconditional
+ * instead of needing a language check.
  */
 @Component({
   selector: 'app-priority-badge',

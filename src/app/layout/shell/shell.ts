@@ -25,15 +25,15 @@ const SEARCH_DEBOUNCE_MS = 300;
 const HANDSET_QUERY = '(max-width: 1023.98px)';
 
 /**
- * The persistent app shell: header + sidebar + routed content. This is the
- * one "smart" piece of layout — it owns the global search box's debounce
- * (a textbook use of `debounceTime`/`distinctUntilChanged`, satisfying the
- * "proper RxJS operator usage" requirement), resolves the header's
+ * The persistent app shell: header + sidebar + routed content. This is
+ * the one "smart" piece of layout — it owns the global search box's
+ * debounce (a textbook use of debounceTime/distinctUntilChanged, covering
+ * the "proper RxJS operator usage" requirement), resolves the header's
  * current-user avatar, and switches the sidebar between a permanently
  * visible rail (desktop) and an overlay drawer (tablet/mobile) via CDK's
- * `BreakpointObserver` — a real Angular layout primitive, not just a CSS
- * media query, because `MatSidenav`'s `mode` is a bound TS property.
- * Everything else it renders is presentational.
+ * BreakpointObserver — a real Angular layout primitive, not just a CSS
+ * media query, since MatSidenav's mode is a bound TS property. Everything
+ * else it renders is presentational.
  */
 @Component({
   selector: 'app-shell',

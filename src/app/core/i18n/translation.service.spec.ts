@@ -84,10 +84,10 @@ describe('TranslationService', () => {
     });
 
     it('returns the raw key instead of crashing for a key that does not actually exist at runtime', () => {
-      // TranslationKey only guarantees a real key at compile time — anything
-      // built from a plain string at runtime (route `data`, stale field
-      // names) can still hand translate() one that was never in either
-      // dictionary. Found live: this crashed a render before the guard.
+      // TranslationKey only guarantees a real key at compile time —
+      // anything built from a plain string at runtime (route data, a
+      // stale field name) can still hand translate() one that's not in
+      // either dictionary. This crashed a real render before the guard.
       const service = new TranslationService();
       const bogusKey = 'this.key.does.not.exist' as unknown as Parameters<
         typeof service.translate

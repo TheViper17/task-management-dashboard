@@ -46,13 +46,11 @@ describe('errorInterceptor', () => {
   });
 
   it('notifies with the translated static message, not the raw English fallback text', () => {
-    // Distinguishes "the interceptor happened to pass the right string"
-    // from "the interceptor actually asked TranslationService" — Arabic's
-    // wording differs from AppError#message, so only the latter matches.
-    // TranslationService is providedIn: 'root' and constructed lazily, on
-    // first inject() — which the interceptor itself does, below — so
-    // setting the persisted locale here, before that first injection,
-    // is enough; no need to reconfigure TestBed.
+    // Arabic's wording differs from AppError#message, so this only passes
+    // if the interceptor actually asked TranslationService for it rather
+    // than just forwarding message. TranslationService is providedIn:
+    // 'root' and only built on first inject() — which happens below, inside
+    // the interceptor — so setting the locale here first is enough.
     localStorage.setItem('task-dashboard:locale', 'ar');
 
     http.get('/api/tasks').subscribe({ error: () => undefined });
@@ -60,10 +58,9 @@ describe('errorInterceptor', () => {
 
     expect(notifySpy.showError).toHaveBeenCalledWith('تعذّر العثور على العنصر المطلوب.');
 
-    // TranslationService touches document.documentElement.dir/lang as a
-    // side effect (outside Angular's DI, so TestBed's per-test teardown
-    // doesn't reset it) — undone explicitly so it can't leak into whatever
-    // test runs next in this file.
+    // TranslationService sets document.documentElement.dir/lang directly,
+    // outside Angular's DI, so TestBed's teardown won't undo it — reset by
+    // hand so it doesn't leak into the next test in this file.
     localStorage.clear();
     document.documentElement.removeAttribute('dir');
     document.documentElement.lang = 'en';

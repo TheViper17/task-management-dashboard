@@ -150,11 +150,10 @@ describe('TaskStore', () => {
 
     it('inserts an optimistic task immediately, then reconciles with the server response', async () => {
       await seed([]);
-      // Mirrors what the real mock backend echoes back from a bare POST: no
-      // embedded `assignee`, since json-server has no relational join and
-      // only ever persists what CreateTaskDto sent (assigneeId, no assignee).
-      // Cast is deliberate — this is reproducing a real-world shape mismatch
-      // against the (assignee-required) Task type, not a typo.
+      // Mimics what the mock backend actually sends back from a bare POST —
+      // no embedded assignee, since json-server can't do relational joins.
+      // The cast is intentional, not a typo — it's reproducing a real shape
+      // mismatch against Task's type.
       const rawResponse = {
         ...makeTask({ id: 'task-99', ...dto }),
         assignee: undefined,
@@ -166,9 +165,9 @@ describe('TaskStore', () => {
 
       const result = await promise;
       expect(apiSpy.create).toHaveBeenCalledWith(dto, ASSIGNEE);
-      // The store must overlay the resolved assignee itself — it can never
-      // trust the server response to carry one back. This is the exact bug
-      // that crashed TaskCard's template on a real assignee-less response.
+      // The store has to overlay the assignee itself — it can't trust the
+      // server response to carry one back. This is the actual bug that
+      // used to crash TaskCard's template.
       const expected = { ...rawResponse, assignee: ASSIGNEE };
       expect(result).toEqual(expected);
       expect(store.tasks()).toEqual([expected]);
@@ -225,8 +224,8 @@ describe('TaskStore', () => {
         email: 'grace@company.com',
       };
       userStoreStub.findById.mockReturnValue(newAssignee);
-      // Same real-world shape mismatch as create(): the mock backend's raw
-      // response carries assigneeId but no embedded assignee.
+      // Same shape mismatch as create() — the raw response has an
+      // assigneeId but no embedded assignee.
       const rawResponse = {
         ...makeTask({ id: '1', assigneeId: newAssignee.id }),
         assignee: undefined,

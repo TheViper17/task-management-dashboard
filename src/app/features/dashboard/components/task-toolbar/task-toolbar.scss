@@ -26,6 +26,6 @@
   gap: var(--app-space-3);
 }
 
-// mat-flat-button already renders in the theme's primary colour by default
-// (no override needed — verified against the live app, unlike the
-// destructive confirm-dialog button, which does need one).
+// mat-flat-button already renders in the theme's primary colour by
+// default, so no override needed here — verified against the live app.
+// (The destructive confirm-dialog button does need one, though.)

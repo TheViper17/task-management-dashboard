@@ -84,12 +84,10 @@ describe('ActivityStore', () => {
     });
 
     it('does not crash when a task is missing updatedAt', () => {
-      // Regression test: found live by creating a task and reloading, back
-      // when TaskApiService didn't stamp createdAt/updatedAt on write —
-      // json-server just persisted whatever was POSTed, so an already-stored
-      // task without updatedAt made `undefined.localeCompare()` throw and
-      // take this whole seed pass down with it. Task#updatedAt is typed as
-      // required; the cast reproduces the real-world shape mismatch anyway.
+      // Regression test — this used to crash for real, back before
+      // TaskApiService stamped createdAt/updatedAt on write. Task#updatedAt
+      // is typed as required, so the cast below is faking a shape that
+      // shouldn't happen but did.
       const withTimestamp = makeTask({ id: 'has-timestamp' });
       const withoutTimestamp = {
         ...makeTask({ id: 'missing-timestamp' }),

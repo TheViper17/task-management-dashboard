@@ -61,8 +61,8 @@
 }
 
 // CDK adds this class to the app-task-card host when [cdkDragDisabled] is
-// true (an optimistic, not-yet-confirmed task) — only reachable from here,
-// not from board-column.scss, since it's past that stylesheet's scope.
+// true (an optimistic, not-yet-confirmed task) — only reachable here, not
+// from board-column.scss, since that's past its scope.
 :host(.cdk-drag-disabled) .task-card__handle {
   cursor: not-allowed;
 }
@@ -73,8 +73,9 @@
 }
 
 // Not part of .task-card__handle — see the HTML comment above it. Same
-// flex-column + inherited gap as the handle, so pulling title/description
-// out into their own wrapper doesn't disturb the card's overall spacing.
+// flex-column + inherited gap as the handle, so splitting
+// title/description into their own wrapper doesn't disturb the card's
+// overall spacing.
 .task-card__editable {
   display: flex;
   flex-direction: column;
@@ -145,8 +146,8 @@
   overflow: hidden;
 }
 
-// A row of every tag, not just the first — previously this rendered only
-// `tags()[0]`, so a task with several tags silently hid the rest.
+// Shows every tag, not just the first — this used to render only
+// tags()[0], so a task with several tags silently hid the rest.
 .task-card__tags {
   display: flex;
   flex-wrap: wrap;

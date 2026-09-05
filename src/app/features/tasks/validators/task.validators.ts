@@ -3,23 +3,23 @@ import type { TranslateParams } from '../../../core/i18n/translation.model';
 import type { TranslationKey } from '../../../core/i18n/translations/en';
 import type { Assignee } from '../../../core/models/task.model';
 
-// Single source of truth for title/description length constraints — used by
-// TaskForm's reactive-forms Validators.min/maxLength below, and by
-// TaskCard's lightweight double-click-to-rename inline editing
-// (validateTitleText/validateDescriptionText), which doesn't use reactive
-// forms but must enforce the same rules so a title/description edited
-// in-place can't drift out of sync with one edited via the modal.
+// Single source of truth for title/description length limits — used by
+// TaskForm's Validators.min/maxLength below, and by TaskCard's
+// double-click-to-rename inline editing (validateTitleText/
+// validateDescriptionText), which doesn't use reactive forms but needs
+// the same rules so an inline edit can't drift out of sync with the
+// modal.
 export const TITLE_MIN_LENGTH = 3;
 export const TITLE_MAX_LENGTH = 120;
 export const DESCRIPTION_MIN_LENGTH = 10;
 export const DESCRIPTION_MAX_LENGTH = 500;
 
 /**
- * A validation failure as a translation key + params rather than a formatted
+ * A validation failure as a translation key + params, not a formatted
  * string — these two functions are plain, framework-agnostic code (no
- * `inject()`, independently unit-tested), so they can't call
- * `TranslationService` themselves. The caller (`TaskCard`) resolves the
- * actual wording via `i18n.translate(error.key, error.params)`.
+ * inject()), so they can't call TranslationService themselves. The
+ * caller (TaskCard) resolves the actual wording via
+ * i18n.translate(error.key, error.params).
  */
 export interface TextValidationError {
   key: TranslationKey;
@@ -44,12 +44,12 @@ export function validateDescriptionText(value: string): TextValidationError | nu
 
 /**
  * Rejects a due date earlier than today. Compares whole days, ignoring
- * time-of-day, so "today" is always valid regardless of the current hour.
+ * time of day, so "today" is always valid no matter the current hour.
  *
- * Accepts either a `"YYYY-MM-DD"` string or a `Date` — `TaskForm`'s due-date
- * control holds a `Date` (mat-datepicker's native adapter), but this is
- * exercised directly against strings in its own spec, and `new Date(value)`
- * handles both identically.
+ * Accepts either a "YYYY-MM-DD" string or a Date — TaskForm's control
+ * holds a Date (mat-datepicker's native adapter), but this gets tested
+ * directly against strings too, and new Date(value) handles both the
+ * same way.
  */
 export function notInPastValidator(): ValidatorFn {
   return (control: AbstractControl<string | Date | null>): ValidationErrors | null => {
@@ -67,9 +67,9 @@ export function notInPastValidator(): ValidatorFn {
 
 /**
  * Ensures the selected assignee id refers to a currently known assignee.
- * Takes a getter (rather than a snapshot array) so it always checks against
- * the *current* directory — assignees load asynchronously from the API, so
- * a snapshot captured when the form was built could go stale.
+ * Takes a getter rather than a snapshot array, so it always checks the
+ * current directory — assignees load asynchronously, so a snapshot taken
+ * when the form was built could go stale.
  */
 export function assigneeExistsValidator(getAssignees: () => readonly Assignee[]): ValidatorFn {
   return (control: AbstractControl<string>): ValidationErrors | null => {

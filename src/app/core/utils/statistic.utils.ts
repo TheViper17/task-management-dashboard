@@ -9,11 +9,11 @@ const VALUE_KEY_BY_TITLE: Record<string, keyof TaskCounts> = {
 };
 
 /**
- * Overrides each stat card's `value` with the live count derived from the
- * current task list, keeping the icon/change/changeLabel/color from the
- * fetched statistics (the mock API's seed numbers are static and don't
- * track create/delete — the delta text is flavour we can't derive, but the
- * headline number should always be honest).
+ * Overrides each stat card's value with the live count from the current
+ * task list, keeping the icon/change/changeLabel/color from the fetched
+ * statistics. The mock API's seed numbers are static and don't track
+ * create/delete — the delta text is flavour we can't derive, but the
+ * headline number should always be real.
  */
 export function mergeLiveStatistics(
   seedStatistics: readonly Statistic[],

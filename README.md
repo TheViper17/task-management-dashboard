@@ -1,17 +1,10 @@
 # Task Management Dashboard
 
-A task management dashboard built for a senior Angular developer take-home
-assignment. Angular 22, zoneless, standalone components, Signals, Angular
+A task management dashboard. Angular 22, zoneless, standalone components, Signals, Angular
 Material, `httpResource`, Reactive Forms, Chart.js, and a json-server mock
 backend, matching the Figma design that came with the brief.
 
 **Live repo:** https://github.com/TheViper17/task-management-dashboard
-
-> The brief asked for Angular 20/21.next. Running `@angular/cli@latest` gave
-> me Angular 22.1.5, the current stable release, and I kept it — it's a
-> superset of what was asked, and `httpResource` ships stable there instead
-> of as developer preview. Other non-obvious choices are explained in
-> [Architecture decisions](#architecture-decisions).
 
 ---
 
@@ -30,7 +23,6 @@ backend, matching the Figma design that came with the brief.
 - [Accessibility](#accessibility)
 - [Internationalization](#internationalization)
 - [CI](#ci)
-- [Known limitations & future improvements](#known-limitations--future-improvements)
 
 ---
 
@@ -56,11 +48,11 @@ drag and drop between and within columns.
 recent-activity feed, and a team directory showing live per-user task
 counts.
 
-**Internationalization** (bonus item) — English and Arabic, switched from
+**Internationalization** — English and Arabic, switched from
 the header, with real RTL layout mirroring and proper grammatical plurals.
 See [Internationalization](#internationalization).
 
-**Everything on the brief's "Must Do" list**: standalone components,
+**Topics Required**: standalone components,
 Signals for state, a smart/presentational split, `httpResource` for reads,
 interceptor-based response caching, OnPush everywhere, lazy loading per
 feature, Reactive Forms with custom validators and a dynamic `FormArray`,
@@ -167,9 +159,7 @@ src/app/
 The rule: `features` can depend on `core` and `shared`, never the other
 way, and features don't import each other. One exception — both
 `DashboardPage` and `Shell` import `features/tasks/task-dialog.service` to
-open the create/edit dialog. Duplicating that logic in two places, or
-inventing a whole new layer just to hold one shared service, seemed worse
-than just breaking the rule here.
+open the create/edit dialog.
 
 ### Smart / presentational split
 
@@ -202,11 +192,10 @@ with rollback needs something that can mutate synchronously the moment a
 user acts, then reconcile with the server afterward. Two different jobs,
 two different tools.
 
-### Interceptor order (a mistake I caught while building it)
+### Interceptor order
 
 `provideHttpClient(withInterceptors([cacheInterceptor, errorInterceptor, retryInterceptor]))`
-— cache outermost, retry innermost. I originally had retry and error the
-other way round. While building it, it became clear that was wrong: if
+— cache outermost, retry innermost. While building it, it became clear that was wrong: if
 retry sits outside error, it only ever sees already-mapped `AppError`
 objects, and can't tell a retryable 503 from a non-retryable 404. Retry
 needs to be closest to the backend, seeing the raw `HttpErrorResponse` —
@@ -226,8 +215,7 @@ gets left looking stale by an old cache hit.
 ## State management
 
 Signals plus a per-domain store service — `TaskStore`, `UserStore`,
-`StatisticsStore`, `ActivityStore` — no NgRx. The brief already leans this
-way ("Signals for reactive state management where appropriate"), and an
+`StatisticsStore`, `ActivityStore` — no NgRx. An
 app with this few entity types doesn't really need NgRx's
 action/reducer/effect machinery.
 
@@ -322,9 +310,7 @@ the test times out. `task-card.spec.ts` has the fix in context.
   than just habit.
 - **Zoneless** change detection (see [above](#zoneless)).
 - **Lazy loading per feature**: every route (`dashboard`, the `tasks`
-  dialog, `analytics`, `team`) is its own `loadComponent` chunk. I
-  checked this against the real build output rather than assuming it
-  worked:
+  dialog, `analytics`, `team`) is its own `loadComponent` chunk:
   - Registering Chart.js's `provideCharts(withDefaultRegisterables())`
     at the app root pulled all of Chart.js into the eager bundle, even
     though `AnalyticsPage` itself is lazy — the initial bundle blew past
@@ -348,12 +334,6 @@ the test times out. `task-card.spec.ts` has the fix in context.
 
 ## Accessibility
 
-- **Contrast was actually measured, not eyeballed**: every colour pair in
-  use got checked against WCAG 2.1 AA (4.5:1 for text) with a small
-  script, instead of trusting that it "looked fine." Two pairs genuinely
-  failed — medium-priority badge text was 2.86:1, high-priority/overdue
-  text was 4.35:1 — and both got the minimum darkening needed to clear
-  4.5:1.
 - **Skip-to-content link**, visible on keyboard focus.
 - **`:focus-visible`** styled globally, not suppressed.
 - **`prefers-reduced-motion`** collapses every animation — including the
@@ -370,10 +350,6 @@ the test times out. `task-card.spec.ts` has the fix in context.
   comes with backdrop, focus-trapping in `'over'` mode, and
   keyboard/Escape handling built in — none of that had to be
   reimplemented.
-
-Full WCAG 2.1 AA compliance (the brief's bonus item) hasn't been audited
-with a tool like axe or Lighthouse — see
-[Known limitations](#known-limitations--future-improvements).
 
 ---
 
@@ -446,37 +422,3 @@ a drop fails the run, it's not just reported), and a production build
 (which catches AOT/type errors dev mode can miss and enforces the bundle
 budget). Three separate jobs, so a lint failure doesn't hide whether the
 tests also failed.
-
----
-
-## Known limitations & future improvements
-
-- **No authentication.** Out of scope per the brief — the header's
-  current-user avatar is just the first entry in the mocked user list,
-  noted inline in `Shell` where that shortcut is taken.
-- **Activity feed is synthesized, not real.** The mock API has no
-  activity collection, so `ActivityStore` seeds itself from the most
-  recently updated tasks on first load, then appends an entry per
-  `TaskStore` command for the rest of the session, persisted to
-  `localStorage`. It's a reasonable stand-in, not a real audit log.
-- **`mock-api/db.json` drifts locally as you use the app** (json-server
-  writes through). `npm run db:reset` regenerates it from the assignment's
-  original generator with dates relative to _today_ — run it before a
-  demo if the data's gotten stale or messy.
-- **Lighthouse / a formal WCAG audit**: not run (both bonus items). The
-  a11y work here — measured contrast, skip link, focus management,
-  sr-only chart summaries — was done to actually hold up under an audit,
-  I just haven't run one.
-- **Calendar / Settings** are intentionally unbuilt placeholder routes —
-  present in the Figma sidebar, not in the brief's functional
-  requirements.
-- **Drag-and-drop keyboard accessibility**: Angular CDK's drag-drop
-  doesn't ship full keyboard-driven reordering out of the box. The
-  mitigation already in place: every status change reachable by drag is
-  _also_ reachable through the fully keyboard-accessible Edit form (a
-  `mat-select`), so no functionality is drag-only.
-- **If this grew past a handful of users**: `TeamPage`'s per-user task
-  count does an O(tasks) scan on every render via `computed()` — fine at
-  this scale, but I'd want a `Map` built once per `tasks()` change at
-  real scale. Didn't bother pre-emptively; that would've just been
-  premature optimization.

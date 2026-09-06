@@ -29,6 +29,8 @@ export class Header {
 
   readonly currentUserInitials = input<string | null>(null);
   readonly notificationCount = input(0);
+  /** Only the dashboard actually filters by search — hidden everywhere else. */
+  readonly showSearch = input(true);
 
   readonly searchChange = output<string>();
   readonly notificationsClick = output<void>();

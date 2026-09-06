@@ -15,15 +15,17 @@
     <span class="header__title">{{ 'app.title' | translate }}</span>
   </div>
 
-  <div class="header__search">
-    <mat-icon aria-hidden="true">search</mat-icon>
-    <input
-      type="search"
-      [formControl]="searchControl"
-      [placeholder]="'header.searchPlaceholder' | translate"
-      [attr.aria-label]="'header.searchLabel' | translate"
-    />
-  </div>
+  @if (showSearch()) {
+    <div class="header__search">
+      <mat-icon aria-hidden="true">search</mat-icon>
+      <input
+        type="search"
+        [formControl]="searchControl"
+        [placeholder]="'header.searchPlaceholder' | translate"
+        [attr.aria-label]="'header.searchLabel' | translate"
+      />
+    </div>
+  }
 
   <div class="header__actions">
     <button

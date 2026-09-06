@@ -1,5 +1,6 @@
 import { BreakpointObserver } from '@angular/cdk/layout';
-import { provideRouter } from '@angular/router';
+import { TestBed } from '@angular/core/testing';
+import { provideRouter, Router } from '@angular/router';
 import { render, screen } from '@testing-library/angular';
 import userEvent from '@testing-library/user-event';
 import { of } from 'rxjs';
@@ -20,7 +21,10 @@ describe('Shell', () => {
     createTaskSpy = vi.fn();
     return render(Shell, {
       providers: [
-        provideRouter([]),
+        // A route that matches but renders nothing — enough for
+        // Router.navigateByUrl() to resolve for real in the search tests
+        // below, without needing an actual component behind it.
+        provideRouter([{ path: 'dashboard', children: [] }]),
         { provide: TaskStore, useValue: { setSearch: setSearchSpy } },
         { provide: UserStore, useValue: { users: () => users } },
         { provide: TaskDialogService, useValue: { createTask: createTaskSpy } },
@@ -29,6 +33,17 @@ describe('Shell', () => {
         { provide: BreakpointObserver, useValue: { observe: () => of({ matches: isHandset }) } },
       ],
     });
+  }
+
+  /**
+   * The header's search box only shows on /dashboard — see
+   * Header.showSearch. navigateByUrl() resolving doesn't itself flush the
+   * pending zoneless view update, so this forces one, same as
+   * flushResource() does for httpResource elsewhere.
+   */
+  async function navigateToDashboard(): Promise<void> {
+    await TestBed.inject(Router).navigateByUrl('/dashboard');
+    TestBed.tick();
   }
 
   afterEach(() => vi.useRealTimers());
@@ -69,6 +84,7 @@ describe('Shell', () => {
     vi.useFakeTimers();
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     await setup();
+    await navigateToDashboard();
 
     await user.type(screen.getByRole('searchbox'), 'design');
     expect(setSearchSpy).not.toHaveBeenCalled();
@@ -81,6 +97,7 @@ describe('Shell', () => {
     vi.useFakeTimers();
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     await setup();
+    await navigateToDashboard();
 
     await user.type(screen.getByRole('searchbox'), 'x');
     await vi.advanceTimersByTimeAsync(300);
@@ -89,6 +106,16 @@ describe('Shell', () => {
     await vi.advanceTimersByTimeAsync(300);
 
     expect(setSearchSpy).toHaveBeenCalledTimes(1);
+  });
+
+  describe('search visibility', () => {
+    it('hides the header search box until the route is /dashboard', async () => {
+      await setup();
+      expect(screen.queryByRole('searchbox')).not.toBeInTheDocument();
+
+      await navigateToDashboard();
+      expect(screen.getByRole('searchbox')).toBeInTheDocument();
+    });
   });
 
   describe('responsive drawer', () => {

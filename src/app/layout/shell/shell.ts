@@ -9,8 +9,8 @@ import {
 } from '@angular/core';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
-import { RouterOutlet } from '@angular/router';
-import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
+import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { debounceTime, distinctUntilChanged, filter, map } from 'rxjs/operators';
 import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import { TaskStore } from '../../core/stores/task.store';
 import { UserStore } from '../../core/stores/user.store';
@@ -47,6 +47,7 @@ export class Shell {
   private readonly userStore = inject(UserStore);
   private readonly taskDialog = inject(TaskDialogService);
   private readonly breakpointObserver = inject(BreakpointObserver);
+  private readonly router = inject(Router);
 
   private readonly drawer = viewChild.required(MatSidenav);
 
@@ -57,6 +58,18 @@ export class Shell {
   readonly isHandset = toSignal(
     this.breakpointObserver.observe(HANDSET_QUERY).pipe(map((result) => result.matches)),
     { initialValue: false },
+  );
+
+  // The header's search box only makes sense on the dashboard — it drives
+  // TaskStore's filter, which nothing on the other routes reads. Router.url
+  // is a plain snapshot, not reactive on its own, so this re-derives it
+  // from NavigationEnd events instead of just reading it once.
+  protected readonly isDashboardRoute = toSignal(
+    this.router.events.pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+      map(() => this.router.url.startsWith('/dashboard')),
+    ),
+    { initialValue: this.router.url.startsWith('/dashboard') },
   );
 
   private readonly searchTerm = signal('');

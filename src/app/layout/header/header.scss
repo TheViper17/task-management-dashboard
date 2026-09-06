@@ -96,6 +96,10 @@
   align-items: center;
   gap: var(--app-space-4);
   flex-shrink: 0;
+  // Normally .header__search's flex:1 1 auto is what pushes this to the
+  // right edge — but search is hidden outside the dashboard, so this has
+  // to hold that position on its own too.
+  margin-inline-start: auto;
 }
 
 .header__icon-button {

@@ -3,6 +3,7 @@
 
   <app-header
     [currentUserInitials]="currentUser()?.avatar ?? null"
+    [showSearch]="isDashboardRoute()"
     (searchChange)="onSearchChange($event)"
     (menuClick)="onMenuToggle()"
   />

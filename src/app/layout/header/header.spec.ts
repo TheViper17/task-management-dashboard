@@ -47,6 +47,14 @@ describe('Header', () => {
     expect(screen.getByText('JD')).toBeInTheDocument();
   });
 
+  it('shows the search box by default, and hides it when showSearch is false', async () => {
+    const { rerender } = await render(Header);
+    expect(screen.getByRole('searchbox')).toBeInTheDocument();
+
+    await rerender({ inputs: { showSearch: false } });
+    expect(screen.queryByRole('searchbox')).not.toBeInTheDocument();
+  });
+
   describe('language switcher', () => {
     it('opens a menu listing both languages by their own native name', async () => {
       const user = userEvent.setup();
